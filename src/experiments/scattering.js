@@ -129,7 +129,7 @@ export default async function run({ lab, ui }) {
   await lab.home(1.2);
 
   /* ----------------------------------------------- 2. hypo */
-  ui.step(1, 'Drag the <b>sodium thiosulphate</b> (hypo) bottle onto the tank to add about 200 g of crystals (or tap it).');
+  ui.step(1, 'Drag the <b>sodium thiosulphate</b> (hypo) bottle onto the tank to add about 200 g of crystals.');
   await lab.waitDrop(hypo, tank, { radius: 0.15 });
   const hHome = hypo.position.clone();
   await lab.carry(hypo, [TANK_X - 0.02, 0.15, 0.03], { lift: 0.06, duration: 1.0 });
@@ -173,24 +173,23 @@ export default async function run({ lab, ui }) {
   /* ----------------------------------------------- 4. time-lapse */
   ui.step(3, 'Very fine particles of sulphur will now slowly form in the water.');
   await ui.predict({ q: 'As more and more tiny sulphur particles form, the patch of light on the screen will turn…', options: ['bluer', 'orange and then red', 'brighter white', 'green'], answer: 1, explain: 'The tiny particles scatter blue light out of the beam most strongly, so the light that gets straight through to the screen is left reddish.' });
-  ui.instruct('Press the button to start the stopwatch. Three minutes are shown as a time-lapse. Watch the tank <b>and</b> the screen.');
-  await ui.waitButton('▶ Start stopwatch (time-lapse)');
-  lab.sfx('tick');
+  ui.instruct('<b>Hold the stopwatch button</b> to let three minutes pass. Time only runs while you hold. Watch the tank <b>and</b> the screen.');
   const restore = freeCam(lab);
   await lab.focus({ pos: [0.04, 0.3, 0.98], target: [0.06, BY, 0.0] }, 1.2);
   st.running = true;
-  const SPEED = 12;                             // 180 s shown in 15 s
   const marks = [60, 120, 180]; let next = 0;
-  const stop = lab.onUpdate((dt) => {
-    if (!st.running) return;
-    st.simT = Math.min(180, st.simT + dt * SPEED); st.tau = tauAt(st.simT);
-    if (next < marks.length && st.simT >= marks[next]) {
-      table.addRow([`${marks[next] / 60}:00`, sideName(st.tau), colourName(transmitted(st.tau))]);
-      lab.sfx('tick'); next++;
-    }
+  // 180 s of reaction pass in 15 s of holding
+  await lab.hold({
+    label: 'Hold — stopwatch', seconds: 15,
+    onTick: (p) => {
+      st.simT = 180 * p; st.tau = tauAt(st.simT);
+      if (next < marks.length && st.simT >= marks[next] - 1e-6) {
+        table.addRow([`${marks[next] / 60}:00`, sideName(st.tau), colourName(transmitted(st.tau))]);
+        lab.sfx('tick'); next++;
+      }
+    },
   });
-  await lab.waitUntil(() => st.simT >= 180);
-  st.running = false; stop();
+  st.running = false;
   ui.observe(`After about a minute the beam inside the tank starts to glow; by 3 minutes the liquid is faintly milky (optical depth τ ≈ ${st.tau.toFixed(1)} for yellow light across the tank).`, { icon: '⏱️' });
 
   /* ----------------------------------------------- 5. side view */

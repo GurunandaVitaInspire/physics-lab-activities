@@ -73,10 +73,12 @@ export default async function run({ lab, ui }) {
   await lab.focus({ pos: [BX + 0.07, 0.25, 0.3], target: [BX, 0.2, 0] }, 1.2);
   ui.readout('t', 'Water bath', '30.0', { unit: ' °C', color: '#ef4444' });
   const ro = lab.onUpdate(() => ui.readout('t', 'Water bath', bath.thermo.temp.toFixed(1), { unit: ' °C', color: '#ef4444' }));
-  ui.instruct('Heating the water bath… (time-lapse: about 4 minutes)', { sub: 'Watch the thermometer.' });
-  const tw = bath.thermo.tweenTemp(64, 5);
-  lab.wait(2.4).then(() => { bath.steam.rate = 3; }).catch(() => {});
-  await lab.wait(5.2); tw.kill();
+  ui.instruct('Warm the water bath to about 64 °C — <b>hold the button</b>. It only heats while you hold.', { sub: 'Watch the thermometer.' });
+  const T0 = bath.thermo.temp;
+  await lab.hold({
+    label: 'Hold to heat', seconds: 7,
+    onTick: (p) => { bath.thermo.setTemp(T0 + (64 - T0) * p); bath.steam.rate = p > 0.45 ? 3 : 0; },
+  });
   ui.observe('The water in the beaker warms up to about 64 °C and gives off a little steam. The water bath heats the ethanol gently and keeps it away from the flame.', { icon: '🌡️' });
 
   /* ------------------------------------------- 3. tube into the bath */

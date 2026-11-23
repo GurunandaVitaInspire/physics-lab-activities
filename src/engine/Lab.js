@@ -370,8 +370,8 @@ export class Lab {
   }
 
   /**
-   * Student drags `item` onto `target` (or simply taps the item). Resolves when dropped close enough
-   * or tapped. The experiment animates the final placement itself.
+   * Student must DRAG `item` onto `target` (a tap only shows which way to drag). Resolves when dropped
+   * close enough; the experiment then animates the final placement itself.
    */
   waitDrop(item, target, { radius = 0.12, hint = true } = {}) {
     this.pickable(item);
@@ -381,6 +381,47 @@ export class Lab {
       this._dropJobs.add(rec);
       if (AUTO) this.wait(0.4).then(() => { if (this._dropJobs.has(rec)) rec.done('tap'); }).catch(() => {});
       return () => this._dropJobs.delete(rec);
+    });
+  }
+
+  /** A tap on something that must be dragged: lean it towards its target and say so. */
+  _nudge(item, target) {
+    const a = item.getWorldPosition(new THREE.Vector3()), b = target.getWorldPosition(new THREE.Vector3());
+    const dir = b.sub(a).setY(0); const len = dir.length();
+    if (len > 1e-4) dir.multiplyScalar(Math.min(0.03, len * 0.25) / len);
+    const p0 = item.position.clone();
+    const tl = this.timeline();
+    tl.to(item.position, { x: p0.x + dir.x, y: p0.y + 0.015, z: p0.z + dir.z, duration: 0.25, ease: 'power2.out' })
+      .to(item.position, { x: p0.x, y: p0.y, z: p0.z, duration: 0.35, ease: 'power2.in' });
+    // "Zinc granules" -> "zinc granules", but keep formulae/acronyms such as "HCl" or "KMnO₄"
+    const nice = (t) => { t = t.replace(/^the /i, ''); return /^[A-Z][a-z]/.test(t) ? t[0].toLowerCase() + t.slice(1) : t; };
+    const what = nice(item.userData.pickLabel || item.name || 'it');
+    const where = nice(target.userData.pickLabel || target.name || 'glowing apparatus');
+    this.ui?.toast?.(`Drag the ${what} onto the ${where} — tapping won’t do it for you`, 'info', 2800);
+    this.sfx?.('tick');
+  }
+
+  /**
+   * Press-and-hold process: progress advances only while the student holds the HOLD button (or Space),
+   * and pauses when they let go. Resolves after `seconds` of total holding. onTick(progress, holding) every frame.
+   */
+  hold({ label = 'Hold', seconds = 3, onTick } = {}) {
+    const btn = this.ui?.holdButton?.(label);
+    if (btn && !AUTO) this.ui?.toast?.('Press and hold the button to keep going — let go to pause', 'info', 3200);
+    let t = 0;
+    return this._promise((res) => {
+      const job = {
+        update: (dt) => {
+          const holding = AUTO || !!btn?.held;
+          if (holding) t += dt;
+          const p = Math.min(1, t / seconds);
+          btn?.set(p, holding);
+          onTick?.(p, holding);
+          if (p >= 1) { this.updaters.delete(job); btn?.remove(); res(); }
+        },
+      };
+      this.updaters.add(job);
+      return () => { this.updaters.delete(job); btn?.remove(); };
     });
   }
 
@@ -486,7 +527,7 @@ export class Lab {
       const wasClick = downAt && Math.hypot(e.clientX - downAt.x, e.clientY - downAt.y) < 6 && performance.now() - downAt.t < 600;
       if (d) {
         if (d.drop) {
-          if (!d.moved) { d.drop.done('tap'); return; }
+          if (!d.moved) { this._nudge(d.obj, d.drop.target); return; }
           const p = d.obj.getWorldPosition(_v);
           const tgt = d.drop.target.getWorldPosition(_v2);
           if (Math.hypot(p.x - tgt.x, p.z - tgt.z) < d.drop.radius) { this.sfx?.('drop'); d.drop.done('drag'); }
@@ -570,7 +611,15 @@ export class Lab {
   resize() {
     const w = this.container.clientWidth, h = this.container.clientHeight;
     if (!w || !h) return;
-    this.camera.aspect = w / h; this.camera.updateProjectionMatrix();
+    this.camera.aspect = w / h;
+    // Experiments are framed for a ~1.5:1 view. On narrower screens widen the vertical FOV so the same
+    // width of bench stays visible (capped so phones in portrait do not get a fish-eye look).
+    const base = this._baseFov ??= this.camera.fov, designAspect = 1.5;
+    if (w / h < designAspect) {
+      const hHalf = Math.atan(Math.tan(THREE.MathUtils.degToRad(base) / 2) * designAspect);
+      this.camera.fov = Math.min(62, THREE.MathUtils.radToDeg(2 * Math.atan(Math.tan(hHalf) / (w / h))));
+    } else this.camera.fov = base;
+    this.camera.updateProjectionMatrix();
     this.renderer.setSize(w, h); this.composer.setSize(w, h); this.labels.setSize(w, h);
     this.outline.setSize(w, h); this.bloom.setSize(w, h);
   }

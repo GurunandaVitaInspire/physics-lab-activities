@@ -90,7 +90,7 @@ export default async function run({ lab, ui }) {
       { type: 'line', a: O.clone().addScaledVector(dI, -0.085), b: O.clone(), arrow: true, arrowAt: 0.3 },
       { type: 'cross', c: P }, { type: 'cross', c: Q },
     ]);
-    ui.instruct('Fix pins <b>P</b> and <b>Q</b> upright on the incident ray. Drag each pin onto its cross (or tap it).', { sub: 'Push the pins in vertically; mind the sharp points.' });
+    ui.instruct('Fix pins <b>P</b> and <b>Q</b> upright on the incident ray. Drag each pin onto its cross.', { sub: 'Push the pins in vertically; mind the sharp points.' });
     await T.fixPin(pP, P, 'P' + sub);
     await T.fixPin(pQ, Q, 'Q' + sub);
 

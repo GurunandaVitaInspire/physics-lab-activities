@@ -311,15 +311,23 @@ export async function pourInto(lab, src, target, { amount = 0.02, duration = 2, 
   const lip = src.localToWorld(lipL.clone());
   const surf = () => target.localToWorld(new THREE.Vector3(0, target.surfaceY, 0)).y;
   stream.set(lip, new THREE.Vector3(mouth.x, surf(), mouth.z));
-  stream.visible = true; stream.k = 0;
-  lab.sfx?.('pour');
-  await lab.tween(stream, { k: 1, duration: 0.25 });
-  onFlowing?.();
-  const lvl = target.fill(target.level + amount, duration);
-  const dr = v.setLevel ? v.fill(drainTo, duration * 0.9) : null;
-  const upd = lab.onUpdate(() => { stream._to.y = surf(); });
-  await lab.wait(duration);
-  lvl.kill?.(); dr?.kill?.(); upd();
+  stream.k = 0;
+  // Hold to pour: flows only while the student holds, so the transfer happens gradually.
+  const t0 = target.level, s0 = v.level ?? 0;
+  let started = false, was = false;
+  await lab.hold({
+    label: 'Hold to pour', seconds: Math.max(2.5, duration * 1.6),
+    onTick: (p, holding) => {
+      stream.k += ((holding ? 1 : 0) - stream.k) * 0.3;
+      stream.visible = stream.k > 0.02;
+      if (holding && !was) lab.sfx?.('pour');
+      if (holding && !started) { started = true; onFlowing?.(); }
+      was = holding;
+      target.setLevel(t0 + amount * p);
+      if (v.setLevel) v.setLevel(s0 + (drainTo - s0) * Math.min(1, p / 0.9));
+      stream._to.y = surf();
+    },
+  });
   await lab.tween(stream, { k: 0, duration: 0.2 });
   lab.remove(stream); stream.geometry.dispose();
   await lab.tween(src.rotation, { z: homeRot.z, duration: 0.6, ease: 'power2.inOut' });

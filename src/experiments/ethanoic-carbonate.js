@@ -127,7 +127,7 @@ export default async function run({ lab, ui }) {
   const fizzSound = () => { let acc = 0; fizzLoop?.(); fizzLoop = lab.onUpdate((dt) => { if ((acc += dt) > 1.4) { acc = 0; lab.sfx('fizz'); } }); };
 
   /* ------------------------------------------- 1. sodium carbonate into A */
-  ui.step(0, 'Drag the <b>spatula</b> to test tube <b>A</b> to add a spatula-full of sodium carbonate.', { sub: 'Or tap the spatula. Use a clean, dry spatula for each solid.' });
+  ui.step(0, 'Drag the <b>spatula</b> to test tube <b>A</b> to add a spatula-full of sodium carbonate.', { sub: 'Use a clean, dry spatula for each solid.' });
   await lab.waitDrop(spat, A, { radius: 0.1 });
   await addPowder(dishNa, A);
   ui.observe('Sodium carbonate is a white powder. It lies at the bottom of test tube A.', { icon: '🥄' });

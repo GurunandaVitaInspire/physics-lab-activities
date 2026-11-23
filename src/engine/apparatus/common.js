@@ -436,15 +436,23 @@ export async function pour(lab, bottle, target, { amount = 0.03, duration = 2, s
   const stream = new Stream(mat, 0.0016); lab.scene.add(stream); lab.track(stream);
   const lip = bottle.localToWorld((bottle.lipLocal || new THREE.Vector3(0, 0.1, 0)).clone());
   stream.set(lip, new THREE.Vector3(mouth.x, target.localToWorld(new THREE.Vector3(0, target.surfaceY, 0)).y, mouth.z));
-  stream.visible = true; stream.k = 0;
-  lab.sfx?.('pour');
-  await lab.tween(stream, { k: 1, duration: 0.25 });
-  onFlowing?.();
-  const lvl = target.fill(target.level + amount, duration);
-  if (src.setLevel && src.level > 0) src.fill(Math.max(0.004, src.level - amount * 0.5), duration);
-  const upd = lab.onUpdate(() => { stream._to.y = target.localToWorld(new THREE.Vector3(0, target.surfaceY, 0)).y; });
-  await lab.wait(duration);
-  lvl.kill?.(); upd();
+  stream.k = 0;
+  // The student pours by holding: liquid flows only while held, so the level creeps up as they pour.
+  const t0 = target.level, s0 = src.level ?? 0;
+  let started = false, was = false;
+  await lab.hold({
+    label: 'Hold to pour', seconds: Math.max(2.5, duration * 1.6),
+    onTick: (p, holding) => {
+      stream.k += ((holding ? 1 : 0) - stream.k) * 0.3;
+      stream.visible = stream.k > 0.02;
+      if (holding && !was) lab.sfx?.('pour');
+      if (holding && !started) { started = true; onFlowing?.(); }
+      was = holding;
+      target.setLevel(t0 + amount * p);
+      if (src.setLevel && s0 > 0) src.setLevel(Math.max(0.004, s0 - amount * 0.5 * p));
+      stream._to.y = target.localToWorld(new THREE.Vector3(0, target.surfaceY, 0)).y;
+    },
+  });
   await lab.tween(stream, { k: 0, duration: 0.2 });
   lab.remove(stream); stream.geometry.dispose();
   await lab.tween(bottle.rotation, { z: homeRot.z, duration: 0.6, ease: 'power2.inOut' });

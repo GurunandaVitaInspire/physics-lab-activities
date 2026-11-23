@@ -43,7 +43,7 @@ export default async function run({ lab, ui }) {
   await ui.ready();
 
   /* ----------------------------------------------- 1. add zinc granules */
-  ui.step(0, 'Drag the dish of <b>zinc granules</b> onto the test tube.', { sub: 'Or simply tap the dish.' });
+  ui.step(0, 'Drag the dish of <b>zinc granules</b> onto the test tube.', { sub: 'Pick it up and carry it over — a tap only shows you where it goes.' });
   await lab.waitDrop(dish, tube, { radius: 0.09 });
   lab.untag(zTag);
   const mouth = tube.mouthWorld();

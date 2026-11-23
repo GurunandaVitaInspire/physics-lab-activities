@@ -173,7 +173,7 @@ export default async function run({ lab, ui }) {
   await ui.ready();
 
   /* -------------------------------------- 1. magnet */
-  ui.step(0, 'Slide the <b>horseshoe magnet</b> so that the aluminium rod lies between its poles.', { sub: 'Drag the magnet towards the rod (or tap it). The N pole is below the rod, so the field between the poles points upward.' });
+  ui.step(0, 'Slide the <b>horseshoe magnet</b> so that the aluminium rod lies between its poles.', { sub: 'Drag the magnet towards the rod. The N pole is below the rod, so the field between the poles points upward.' });
   await lab.waitDrop(magHold, rod, { radius: 0.1 });
   await lab.tween(magHold.position, { x: 0, y: yR, z: Z0, duration: 1.2, ease: 'power2.inOut' });
   magnetIn = true; lab.sfx('drop');

@@ -160,7 +160,7 @@ export default async function run({ lab, ui }) {
   await ui.ready();
 
   /* ------------------------------------------------ 1. slit + light */
-  ui.step(0, 'Drag the <b>cardboard with the narrow slit</b> in front of the light source (or tap it).', { sub: 'The slit lets through only a thin, narrow beam of white light.' });
+  ui.step(0, 'Drag the <b>cardboard with the narrow slit</b> in front of the light source.', { sub: 'The slit lets through only a thin, narrow beam of white light.' });
   await lab.waitDrop(slit, slitMark, { radius: 0.08 });
   await lab.carry(slit, [SLIT_X, 0, 0], { lift: 0.05, duration: 1.0, rotate: { y: 0 } });
   st.slit = true;
@@ -176,7 +176,7 @@ export default async function run({ lab, ui }) {
   /* ------------------------------------------------ 2. prism */
   ui.step(1, 'Now a glass prism will be put in the path of the beam.');
   await ui.predict({ q: 'When the narrow white beam passes through the prism, the screen will show…', options: ['a white strip in the same place', 'a band of seven colours', 'nothing at all', 'only a red strip'], answer: 1, explain: 'Glass bends each colour by a different amount, so white light spreads out into a spectrum.' });
-  ui.instruct('Drag the <b>glass prism</b> onto the dark prism table in the beam (or tap it).', { sub: 'Hold the prism by its top and bottom faces, not by the polished sides.' });
+  ui.instruct('Drag the <b>glass prism</b> onto the dark prism table in the beam.', { sub: 'Hold the prism by its top and bottom faces, not by the polished sides.' });
   await lab.waitDrop(prism1, p1Mark, { radius: 0.08 });
   await lab.carry(prism1, [PRISM_X, TABLE_H, PRISM_Z], { lift: 0.08, duration: 1.2, rotate: { y: Math.PI + PHI0 * DEG } });
   setPhi(PHI0); st.p1 = true; lab.sfx('glass');
@@ -234,7 +234,7 @@ export default async function run({ lab, ui }) {
   const p2c = G.clone().addScaledVector(exitN, off).addScaledVector(tf, slide);
   const p2pos = new THREE.Vector3(p2c.x, TABLE_H, p2c.y);
   p2Mark.position.copy(p2pos);
-  ui.instruct('Drag the <b>second prism</b> next to the first one, inverted, so its face is parallel to the face the colours come out of (or tap it).');
+  ui.instruct('Drag the <b>second prism</b> next to the first one, inverted, so its face is parallel to the face the colours come out of.');
   await lab.waitDrop(prism2, p2Mark, { radius: 0.08 });
   await lab.carry(prism2, p2pos.toArray(), { lift: 0.08, duration: 1.3, rotate: { y: prism1.rotation.y + Math.PI } });
   st.p2 = true; lab.sfx('glass');

@@ -101,7 +101,7 @@ export default async function run({ lab, ui }) {
       await lab.carry(old, [old.info.home[0], 0, old.info.home[1]], { lift: 0.05, duration: 0.9 });
       lab.pickable(old); cur = null; gap.visible = true;
     }
-    ui.instruct(`Drag <b>${spec.info.title}</b> (${spec.info.sub}) into the gap between the clips.`, { sub: 'Or tap it.' });
+    ui.instruct(`Drag <b>${spec.info.title}</b> (${spec.info.sub}) into the gap between the clips.`);
     await lab.waitDrop(spec, gap, { radius: 0.14 });
     gap.visible = false;
     await lab.carry(spec, [-0.04, T, 0.12], { lift: 0.05, duration: 1.0 });

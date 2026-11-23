@@ -1,5 +1,6 @@
 // Activity 2.15 — Water of crystallisation: CuSO₄·5H₂O —heat→ CuSO₄ + 5H₂O, and back again with water.
 import * as THREE from 'three';
+import { AUTO } from '../engine/Lab.js';
 import { boilingTube, bunsenBurner, reagentBottle, spatula, matchbox, powderHeap, dropper, beaker } from '../engine/apparatus/common.js';
 import { Fumes, Sparkles } from '../engine/effects.js';
 import { clearGlass, tubeHolder, boilingTubeRack, sediment, wallDroplets, scoopFrom, tipInto, heatPose, fallingDrop, colorRamp } from '../engine/apparatus/chem2.js';
@@ -107,15 +108,20 @@ export default async function run({ lab, ui }) {
 
   const mid = tube.localToWorld(new THREE.Vector3(0, 0.06, 0));
   await lab.focus({ pos: [mid.x + 0.07, mid.y + 0.03, mid.z + 0.3], target: [mid.x, mid.y - 0.01, mid.z] }, 1.2);
-  ui.instruct('Keep heating — move the tube gently in the flame so it heats evenly.');
+  ui.instruct('Keep the tube moving gently from side to side in the flame — it only heats while you keep moving it.');
 
   let heat = 0;
   const lateral = lab.slider(tube, { axis: 'x', min: bx - 0.03, max: bx + 0.03, step: 0, label: 'Boiling tube — move it in the flame' });
   ui.readout('heat', 'Heating time', '0', { unit: 's', color: '#f97316' });
   let tHeat = 0;
   const col = new THREE.Color();
+  // Heating only progresses while the student keeps moving the tube in the flame (as in a real lab).
+  let lastX = tube.position.x, still = 0;
   const heatLoop = lab.onUpdate((dt) => {
+    const moving = Math.abs(tube.position.x - lastX) > 1e-5; lastX = tube.position.x;
+    still = moving ? 0 : still + dt;
     if (!(Math.abs(tube.position.x - bx) < 0.018 && burner.flame.on)) return;
+    if (still > 0.6 && !AUTO) { ui.readout('heat', 'Heating time', 'move it!', { unit: '', color: '#e0353b' }); return; }
     tHeat += dt; heat = Math.min(1, heat + dt / 12);
     ui.readout('heat', 'Heating time', tHeat.toFixed(0), { unit: 's', color: '#f97316' });
     drops.set(Math.min(1, heat * 1.8));

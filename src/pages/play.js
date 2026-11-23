@@ -5,7 +5,7 @@ import { challenges } from '../data/challenges.js';
 import { sfx, unlockAudio, soundOn, setSound } from '../engine/audio.js';
 import { icon } from './icons.js';
 
-const ROUND = 10, TIME = 20, LIVES = 3;
+const ROUND = 10, TIME = 15, LIVES = 3;
 const bestKey = (n) => `ssl.best.${n}`;
 const getBest = (n) => { try { return +localStorage.getItem(bestKey(n)) || 0; } catch { return 0; } };
 const setBest = (n, v) => { try { localStorage.setItem(bestKey(n), String(v)); } catch { /* storage unavailable */ } };
@@ -101,7 +101,7 @@ export async function renderPlay(app, slug) {
         ring.style.strokeDashoffset = C * (1 - left / TIME);
         ring.classList.toggle('low', left < 6);
         ringT.textContent = Math.ceil(left);
-        if (Math.ceil(left) < lastTick && left < 5.5 && left > 0) { lastTick = Math.ceil(left); sfx('tick'); }
+        if (Math.ceil(left) < lastTick && left < 4.5 && left > 0) { lastTick = Math.ceil(left); sfx('tick'); }
         if (left <= 0) { answer(-1); return; }
         timer = requestAnimationFrame(tick);
       };
@@ -141,7 +141,7 @@ export async function renderPlay(app, slug) {
     const end = () => {
       stop(); keyHandler = null;
       const acc = right / Math.max(1, Math.min(i, ROUND));
-      const stars = right >= 9 ? 3 : right >= 6 ? 2 : right >= 3 ? 1 : 0;
+      const stars = right >= 10 ? 3 : right >= 8 ? 2 : right >= 5 ? 1 : 0;
       const prev = getBest(l.no); const isBest = score > prev; if (isBest) setBest(l.no, score);
       stage.innerHTML = `
         <section class="pl-end"><div class="pl-end-card">

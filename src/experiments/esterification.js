@@ -101,20 +101,21 @@ export default async function run({ lab, ui }) {
   await lab.wait(0.3);
   bath.burner.flame.on = true; lab.sfx('hum');
   await lab.focus({ pos: [BX + 0.1, 0.3, 0.36], target: [BX, 0.23, 0] }, 1.2);
-  ui.instruct('Warming for 5 minutes… (time-lapse)', { sub: 'Watch the mixture and the thermometer.' });
+  ui.instruct('Keep the mixture warming for 5 minutes — <b>hold the button</b>. Time only runs while you hold.', { sub: 'Watch the mixture and the thermometer.' });
   const bub = tube.addBubbles({ rate: 0, spread: 0.004, size: 0.0005, speed: 0.03, count: 60 }); lab.track(bub);
   const vap = tube.addFumes({ color: 0xffffff, rate: 0, size: 0.012, rise: 0.04, spread: 0.003, opacity: 0.12, life: 2.4, drift: [0.004, 0] }); lab.track(vap);
-  const tw = bath.thermo.tweenTemp(68, 4.5);
-  let secs = 0;
-  const clock = lab.onUpdate((dt) => {
-    secs = Math.min(300, secs + dt * 50);
-    const s = Math.floor(secs);
-    ui.readout('clk', 'Time in water bath', `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`, { unit: ' min', color: '#0ea5e9' });
-    ui.readout('t', 'Water bath', bath.thermo.temp.toFixed(0), { unit: ' °C', color: '#ef4444' });
-    if (secs > 60) { bub.rate = 6; vap.rate = 2.5; bath.steam.rate = 3; }
+  const T0 = bath.thermo.temp;
+  await lab.hold({
+    label: 'Hold to warm', seconds: 8,
+    onTick: (p, holding) => {
+      const secs = 300 * p, s = Math.floor(secs);
+      bath.thermo.setTemp(T0 + (68 - T0) * Math.min(1, p * 1.5));
+      ui.readout('clk', 'Time in water bath', `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`, { unit: ' min', color: '#0ea5e9' });
+      ui.readout('t', 'Water bath', bath.thermo.temp.toFixed(0), { unit: ' °C', color: '#ef4444' });
+      const on = holding && secs > 60;
+      bub.rate = on ? 6 : 0; vap.rate = on ? 2.5 : 0.4; bath.steam.rate = secs > 60 ? 3 : 0;
+    },
   });
-  await lab.wait(6.2);
-  clock(); tw.kill();
   ui.observe('After 5 minutes in the warm water bath, tiny bubbles rise in the mixture and a little vapour comes out of the test tube. No colour change is seen.', { icon: '♨️' });
   bath.burner.flame.on = false; bub.rate = 0; vap.rate = 0.6;
 

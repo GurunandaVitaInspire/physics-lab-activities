@@ -170,6 +170,32 @@ export class LabUI {
     this.dock.appendChild(el);
     return el;
   }
+  /**
+   * Big press-and-hold button (also Space bar). Returns { held, set(progress, holding), remove() }.
+   * Used by lab.hold() for processes that should only run while the student keeps acting.
+   */
+  holdButton(label = 'Hold') {
+    this._hold?.remove();
+    const el = h('button', 'hold-btn', `<span class="hb-ring"></span><span class="hb-label">${label}</span><span class="hb-sub">or hold Space</span>`);
+    this.viewport.appendChild(el);
+    gsap.from(el, { y: 30, opacity: 0, duration: 0.35, ease: 'back.out(1.6)' });
+    const api = {
+      held: false, el,
+      set: (p, holding) => { el.style.setProperty('--p', p); el.classList.toggle('on', holding); },
+      remove: () => { off(); el.remove(); if (this._hold === api) this._hold = null; },
+    };
+    const down = (e) => { e.preventDefault(); api.held = true; el.setPointerCapture?.(e.pointerId); };
+    const up = () => { api.held = false; };
+    const kd = (e) => { if (e.code === 'Space' && !e.repeat) { e.preventDefault(); api.held = true; } };
+    const ku = (e) => { if (e.code === 'Space') api.held = false; };
+    el.addEventListener('pointerdown', down); el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up); el.addEventListener('lostpointercapture', up);
+    el.addEventListener('contextmenu', (e) => e.preventDefault());
+    window.addEventListener('keydown', kd); window.addEventListener('keyup', ku); window.addEventListener('blur', up);
+    const off = () => { window.removeEventListener('keydown', kd); window.removeEventListener('keyup', ku); window.removeEventListener('blur', up); };
+    this._hold = api;
+    return api;
+  }
+
   clearControls() { this.dock.innerHTML = ''; this.dock.classList.remove('show'); }
   /** Wait for a button in the dock to be pressed. */
   waitButton(label, { primary = true } = {}) {
@@ -357,5 +383,5 @@ export class LabUI {
     });
   }
 
-  dispose() { stopSpeech(); this._abortables.forEach((r) => r(new Error('aborted'))); }
+  dispose() { this._hold?.remove(); stopSpeech(); this._abortables.forEach((r) => r(new Error('aborted'))); }
 }

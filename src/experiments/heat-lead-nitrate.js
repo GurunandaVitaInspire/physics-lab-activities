@@ -1,5 +1,6 @@
 // Activity 1.6 — Heating lead nitrate: 2Pb(NO₃)₂ → 2PbO + 4NO₂ + O₂ (thermal decomposition).
 import * as THREE from 'three';
+import { AUTO } from '../engine/Lab.js';
 import { boilingTube, bunsenBurner, reagentBottle, spatula, matchbox, powderHeap } from '../engine/apparatus/common.js';
 import { Fumes, Sparkles } from '../engine/effects.js';
 import { clearGlass, tubeHolder, boilingTubeRack, sediment, gasFill, fumeCupboard, scoopFrom, tipInto, heatPose } from '../engine/apparatus/chem2.js';
@@ -103,15 +104,20 @@ export default async function run({ lab, ui }) {
 
   const mid = tube.localToWorld(new THREE.Vector3(0, 0.07, 0));
   await lab.focus({ pos: [mid.x + 0.07, mid.y + 0.03, mid.z + 0.3], target: [mid.x, mid.y - 0.01, mid.z] }, 1.2);
-  ui.instruct('Heat the powder — drag the tube gently from side to side in the flame so it heats evenly.', { sub: 'Watch and listen carefully.' });
+  ui.instruct('Heat the powder — keep dragging the tube gently from side to side in the flame. It only heats while you keep moving it.', { sub: 'Watch and listen carefully.' });
 
   let heat = 0, tHeat = 0, crackT = 0, stage = 0;
   const lateral = lab.slider(tube, { axis: 'x', min: bx - 0.03, max: bx + 0.03, step: 0, label: 'Boiling tube — move it in the flame' });
   ui.readout('heat', 'Heating time', '0', { unit: 's', color: '#f97316' });
   const hot = new THREE.Color(0x8a3c12);
+  // Heating only progresses while the student keeps moving the tube in the flame (as in a real lab).
+  let lastX = tube.position.x, still = 0;
   const heatLoop = lab.onUpdate((dt) => {
+    const moving = Math.abs(tube.position.x - lastX) > 1e-5; lastX = tube.position.x;
+    still = moving ? 0 : still + dt;
     const inFlame = Math.abs(tube.position.x - bx) < 0.018 && burner.flame.on;
     if (!inFlame) return;
+    if (still > 0.6 && !AUTO) { ui.readout('heat', 'Heating time', 'move it!', { unit: '', color: '#e0353b' }); return; }
     tHeat += dt; heat = Math.min(1, heat + dt / 11);
     ui.readout('heat', 'Heating time', tHeat.toFixed(0), { unit: 's', color: '#f97316' });
     // decrepitation: crystals crack and jump with a crackling sound
