@@ -23,6 +23,20 @@ export class LabAborted extends Error { constructor() { super('lab aborted'); th
 
 const _v = new THREE.Vector3();
 const _v2 = new THREE.Vector3();
+/** World bounds of an object's visible solid meshes (skips effects such as bubbles, fumes or sprites). */
+function solidBox(o) {
+  const b = new THREE.Box3(); o.updateWorldMatrix(true, true);
+  const walk = (n) => {
+    if (!n.visible) return;
+    if (n.isMesh && !n.isInstancedMesh && n.geometry && n.raycast === THREE.Mesh.prototype.raycast) {
+      if (!n.geometry.boundingBox) n.geometry.computeBoundingBox();
+      const gb = n.geometry.boundingBox.clone().applyMatrix4(n.matrixWorld);
+      if (gb.max.y - gb.min.y < 0.6) b.union(gb);
+    }
+    n.children.forEach(walk);
+  };
+  walk(o); return b;
+}
 
 export class Lab {
   /**
@@ -413,7 +427,10 @@ export class Lab {
         if (!this._dropJobs.has(rec)) return;
         const tp = target.getWorldPosition(new THREE.Vector3());
         const ip = item.getWorldPosition(new THREE.Vector3());
-        const local = item.parent.worldToLocal(new THREE.Vector3(tp.x, ip.y + 0.06, tp.z));
+        const top = target.mouthWorld ? target.mouthWorld().y : solidBox(target).max.y;
+        const under = Math.max(0, ip.y - solidBox(item).min.y);
+        const y = Number.isFinite(top) && top < ip.y + 0.4 ? Math.max(ip.y + 0.06, top + under + 0.015) : ip.y + 0.06;
+        const local = item.parent.worldToLocal(new THREE.Vector3(tp.x, y, tp.z));
         item.position.copy(local);
         rec.done('drag');
       }).catch(() => {});
@@ -575,7 +592,15 @@ export class Lab {
       if (drop || axis) {
         this.controls.enabled = false;
         const planeY = hit.getWorldPosition(_v).y;
-        this.drag = { obj: hit, drop, axis, planeY, start: hit.position.clone(), moved: false, startWorld: _v.clone() };
+        // Carry height: high enough that the item's bottom clears the top of its target (a test tube in a
+        // rack, a flask on a tripod) instead of sliding through it.
+        let liftY = planeY + 0.06;
+        if (drop) {
+          const under = Math.max(0, planeY - solidBox(hit).min.y);
+          const top = drop.target.mouthWorld ? drop.target.mouthWorld().y : solidBox(drop.target).max.y;
+          if (Number.isFinite(top) && top < planeY + 0.4) liftY = Math.max(liftY, top + under + 0.015);
+        }
+        this.drag = { obj: hit, drop, axis, planeY, liftY, start: hit.position.clone(), moved: false, startWorld: _v.clone() };
         el.setPointerCapture?.(e.pointerId);
       }
     };
@@ -587,11 +612,11 @@ export class Lab {
         if (dist > 4) d.moved = true;
         if (!d.moved) return;
         if (d.drop) {
-          const p = this._planePoint(d.planeY + 0.06);
+          const p = this._planePoint(d.liftY);
           if (p) {
             const parentInv = d.obj.parent.matrixWorld.clone().invert();
             const local = p.clone().applyMatrix4(parentInv);
-            d.obj.position.x = local.x; d.obj.position.z = local.z; d.obj.position.y = d.start.y + 0.06;
+            d.obj.position.copy(local);
             const tgt = d.drop.target.getWorldPosition(_v2);
             const near = Math.hypot(p.x - tgt.x, p.z - tgt.z) < d.drop.radius * 1.4;
             this.outline.selectedObjects = near ? [d.obj, d.drop.target] : [d.obj]; this.outline.enabled = true;
