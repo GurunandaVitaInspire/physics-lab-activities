@@ -48,8 +48,8 @@ The site is fully static (all 3D runs in the student's browser), so Vercel serve
 2. Vercel detects **Vite** automatically (`vercel.json` pins it): build `npm run build`, output `dist`. Click **Deploy**.
 3. Every push to `main` redeploys; pull requests get preview URLs.
 
-Performance built in: the first screen loads ~15 KB (gzipped) and paints immediately; three.js (~135 KB gz) loads in the
-background, each lab adds ~5 KB, hashed assets are cached for a year (`vercel.json`), and a service worker keeps opened
+Performance built in: the home page is ~20 KB (gzipped) with no 3D library at all; three.js (~135 KB gz) loads only
+when a lab opens, each lab adds ~5 KB, hashed assets are cached for a year (`vercel.json`), and a service worker keeps opened
 labs working offline. Rendering adapts its resolution on slow school devices.
 
 ## Project layout
@@ -58,7 +58,7 @@ labs working offline. Rendering adapts its resolution on slow school devices.
 src/
   main.js, styles.css         app shell + hash router (#/, #/lesson/<slug>, #/lab/<id>)
   data/lessons.js             curriculum: lessons, activities, aims, materials, safety
-  pages/                      home (with live 3D hero), lesson list, experiment page
+  pages/                      home (lab-console hero + experiment reel), lesson list, experiment page, Play & Learn
   engine/
     Lab.js                    renderer, lab room, camera, drag/tap/slide interactions, test driver
     ui.js                     instruction banner, lab record, readouts, predictions, finish + quiz
