@@ -35,7 +35,7 @@ export default async function run({ lab, ui }) {
   const bottle = lab.add(reagentBottle({ title: 'Copper sulphate', formula: 'CuSO₄·5H₂O', sub: 'crystals', color: BLUE, labelColor: '#1d4ed8', solid: true, level: 0.045 }), [-0.25, 0, 0.05]);
   lab.pickable(bottle, 'Copper sulphate crystals');
 
-  const spat = spatula(); spat.position.set(-0.07, 0.003, 0.12); spat.rotation.y = 0.25; lab.add(spat);
+  const spat = spatula(); spat.position.set(-0.07, 0.003, 0.19); spat.rotation.y = 0.25; lab.add(spat);
   lab.pickable(spat, 'Spatula');
   const heap = powderHeap({ r: 0.0055, h: 0.0045, color: BLUE, crystals: true }); heap.position.set(0.018, 0.0005, 0); heap.visible = false; spat.add(heap);
 
@@ -63,7 +63,7 @@ export default async function run({ lab, ui }) {
   await scoopFrom(lab, spat, bottle, heap);
   ui.instruct('Drag the spatula onto the <b>boiling tube</b> and tip the crystals in.');
   await lab.waitDrop(spat, tube, { radius: 0.1 });
-  await tipInto(lab, spat, heap, tube, { onLand: (k) => bed.setHeight(0.012 * k), home: [-0.07, 0.003, 0.12] });
+  await tipInto(lab, spat, heap, tube, { onLand: (k) => bed.setHeight(0.012 * k), home: [-0.07, 0.003, 0.19] });
   lab.unpickable(spat);
   await lab.focus({ pos: [slot.x + 0.05, 0.07, slot.z + 0.19], target: [slot.x, 0.033, slot.z] }, 1);
   ui.observe('Copper sulphate crystals are <b>bright blue</b> and look perfectly dry.', { icon: '💎' });

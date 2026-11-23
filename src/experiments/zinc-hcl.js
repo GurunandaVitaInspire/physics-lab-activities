@@ -139,6 +139,10 @@ export default async function run({ lab, ui }) {
   bubbles.rate = 25;
   await lab.wait(1.2);
   jiggle();
+  // put the used (charred) splinter back down where it came from
+  await lab.carry(splint, [-0.03, 0.003, 0.15], { lift: 0.04, duration: 1.1, rotate: { z: Math.PI / 2 } });
+  lab.unpickable(splint);
+  await lab.home(1);
 
   await ui.finish({
     equation: 'Zn(s) + 2HCl(aq) → ZnCl₂(aq) + H₂(g)↑',

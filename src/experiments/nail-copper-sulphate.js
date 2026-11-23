@@ -169,6 +169,12 @@ export default async function run({ lab, ui }) {
   ui.observe('Tube A is still <b>blue</b>; tube B is <b>pale green</b>. Copper sulphate in B has changed into iron sulphate.', { icon: '⚖️', highlight: true });
   await lab.wait(1.5);
   threadUpd();
+  thread.visible = false;
+  // tidy up: the nail is laid on the bench in front of the rack, the glass rod goes back to its place
+  await Promise.all([
+    lab.carry(nail, [bw.x + 0.07, 0.003, bw.z + 0.08], { lift: 0.02, duration: 1.3, rotate: { x: 0, y: 0.4, z: Math.PI / 2 } }),
+    lab.carry(rod, [0.06, 0.0025, 0.14], { lift: 0.02, duration: 1.3 }),
+  ]);
   await lab.home(1.2);
 
   await ui.finish({

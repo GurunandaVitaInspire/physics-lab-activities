@@ -24,7 +24,7 @@ export async function renderLesson(app, slug) {
       ${l.experiments.map((e, k) => {
         const s = prog[e.id] || 0;
         return `<a class="exp-card" href="#/lab/${e.id}">
-          <div class="ec-num">${String(k + 1).padStart(2, '0')}</div>
+          <div class="ec-thumb"><img src="/thumbs/${e.id}.jpg" alt="${e.title} — 3D lab" loading="lazy" width="640" height="400"><span class="ec-num">${String(k + 1).padStart(2, '0')}</span></div>
           <div class="ec-body">
             <div class="ec-tag">${e.activity}</div>
             <h3>${e.title}</h3>

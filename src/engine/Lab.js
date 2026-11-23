@@ -383,7 +383,15 @@ export class Lab {
       const zone = this._dropZone(item, target, radius);
       const rec = { item, target, radius, zone, done: (how) => { this.setHint([]); zone.dispose(); res(how); } };
       this._dropJobs.add(rec);
-      if (AUTO) this.wait(0.4).then(() => { if (this._dropJobs.has(rec)) rec.done('tap'); }).catch(() => {});
+      // QA: behave like a real student — carry the item over the target and let go there.
+      if (AUTO) this.wait(0.4).then(() => {
+        if (!this._dropJobs.has(rec)) return;
+        const tp = target.getWorldPosition(new THREE.Vector3());
+        const ip = item.getWorldPosition(new THREE.Vector3());
+        const local = item.parent.worldToLocal(new THREE.Vector3(tp.x, ip.y + 0.06, tp.z));
+        item.position.copy(local);
+        rec.done('drag');
+      }).catch(() => {});
       return () => { this._dropJobs.delete(rec); zone.dispose(); };
     });
   }

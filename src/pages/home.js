@@ -27,7 +27,7 @@ export async function renderHome(app) {
     const s = SUBJECT[e.lesson.subject];
     const st = prog[e.id] || 0;
     return `<a class="xcard" href="#/lab/${e.id}" style="--c:${e.lesson.color}">
-      <div class="xc-art"><img src="/boards/lesson${e.lesson.no}.jpg" alt="" loading="lazy" style="object-position:${(i * 29) % 100}% ${30 + ((i * 17) % 40)}%"><span class="xc-num">${pad(i + 1)}</span></div>
+      <div class="xc-art"><img src="/thumbs/${e.id}.jpg" alt="${e.title} — 3D lab" loading="lazy" width="640" height="400"><span class="xc-num">${pad(i + 1)}</span></div>
       <div class="xc-body">
         <div class="xc-meta"><span class="xc-dot" style="background:${s.color}"></span>Lesson ${e.lesson.no} · ${e.activity}</div>
         <h3>${e.title}</h3>

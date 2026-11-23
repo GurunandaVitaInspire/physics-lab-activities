@@ -35,7 +35,7 @@ export default async function run({ lab, ui }) {
   const bottle = lab.add(reagentBottle({ title: 'Lead nitrate', formula: 'Pb(NO₃)₂', sub: 'solid · TOXIC', color: WHITE, labelColor: '#334155', hazard: true, solid: true, level: 0.045 }), [-0.25, 0, 0.05]);
   lab.pickable(bottle, 'Lead nitrate powder');
 
-  const spat = spatula(); spat.position.set(-0.07, 0.003, 0.12); spat.rotation.y = 0.25; lab.add(spat);
+  const spat = spatula(); spat.position.set(-0.07, 0.003, 0.19); spat.rotation.y = 0.25; lab.add(spat);
   lab.pickable(spat, 'Spatula');
   const heap = powderHeap({ r: 0.0055, h: 0.004, color: WHITE }); heap.position.set(0.018, 0.0005, 0); heap.visible = false; spat.add(heap);
 
@@ -54,7 +54,7 @@ export default async function run({ lab, ui }) {
   await scoopFrom(lab, spat, bottle, heap);
   ui.instruct('Now drag the spatula onto the <b>boiling tube</b> and tip the powder in.');
   await lab.waitDrop(spat, tube, { radius: 0.1 });
-  await tipInto(lab, spat, heap, tube, { onLand: (k) => bed.setHeight(0.013 * k), home: [-0.07, 0.003, 0.12] });
+  await tipInto(lab, spat, heap, tube, { onLand: (k) => bed.setHeight(0.013 * k), home: [-0.07, 0.003, 0.19] });
   lab.unpickable(spat);
   await lab.focus({ pos: [tube.position.x + 0.05, 0.07, tube.position.z + 0.2], target: [tube.position.x, 0.035, tube.position.z] }, 1);
   ui.observe('About 2 g of lead nitrate — a <b>white crystalline powder</b> — is at the bottom of the boiling tube.', { icon: '🧂' });
@@ -159,6 +159,9 @@ export default async function run({ lab, ui }) {
   lab.tween(holder.arm.rotation, { z: 0, duration: 1 }).catch(() => {});
   await lab.carry(tube, [slot.x, 0.013, slot.z], { lift: 0.06, duration: 1.3, rotate: { x: 0, y: 0, z: 0 } });
   lab.sfx('glass');
+  // unclip the holder and lay it back on the bench
+  lab.scene.attach(holder);
+  lab.carry(holder, [0.05, 0.0068, 0.13], { lift: 0.05, duration: 1.1, rotate: { x: 0, y: -0.2, z: 0 } }).catch(() => {});
   // cooling: brown gas escapes, the residue turns yellow
   const yellow = new THREE.Color(0xe0b13a);
   lab.tween(bed.mat.color, { r: yellow.r, g: yellow.g, b: yellow.b, duration: 4 }).catch(() => {});

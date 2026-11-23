@@ -114,3 +114,15 @@ Run `npx vite build` before finishing to catch import/syntax errors.
 - If a newly created `src/experiments/<id>.js` shows "This lab is being set up" in dev, restart `npm run dev`
   (the dev server can miss new files for `import.meta.glob`; production builds always include them).
 - `waitUntil`'s `auto` only runs if the condition is still unmet, so it never undoes what the student already did.
+
+## Audit for misplaced equipment
+
+With the dev server running, open `/?test&auto#/lab/<id>` and run in the console:
+
+```js
+const { audit } = await import('/tools/qa-audit.js'); await audit('<id>');
+```
+
+The auto-student drops every item on its target like a real drag. The audit reports objects that moved during the lab
+and finished intersecting another object or floating in the air, and saves a frame at each key observation
+(`.qa/thumb-<id>-<n>.png`). Thumbnails for the home reel and lesson pages live in `public/thumbs/<id>.jpg` (640×400).
