@@ -115,10 +115,13 @@ export class LabUI {
     sfx('glass');
   }
 
+  /** One message at a time: a new toast replaces the old one instead of stacking up. */
   toast(text, type = 'info', ms = 2600) {
-    const t = h('div', 'toast ' + type, text); this.toasts.appendChild(t);
     if (type === 'warn') { sfx('wrong'); this.mistakes++; }
-    gsap.timeline({ onComplete: () => t.remove() }).from(t, { y: -10, opacity: 0, duration: 0.3 }).to(t, { opacity: 0, duration: 0.4, delay: ms / 1000 });
+    if (this._toast) { this._toastTl?.kill(); this._toast.remove(); }
+    const t = this._toast = h('div', 'toast ' + type, text); this.toasts.appendChild(t);
+    this._toastTl = gsap.timeline({ onComplete: () => { t.remove(); if (this._toast === t) this._toast = null; } })
+      .from(t, { y: 10, opacity: 0, duration: 0.25 }).to(t, { opacity: 0, duration: 0.35, delay: ms / 1000 });
   }
 
   /* ------------------------------------------------------ readouts */

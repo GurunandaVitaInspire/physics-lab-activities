@@ -377,11 +377,77 @@ export class Lab {
     this.pickable(item);
     if (hint) this.setHint([item]);
     return this._promise((res) => {
-      const rec = { item, target, radius, done: (how) => { this.setHint([]); res(how); } };
+      const zone = this._dropZone(item, target, radius);
+      const rec = { item, target, radius, zone, done: (how) => { this.setHint([]); zone.dispose(); res(how); } };
       this._dropJobs.add(rec);
       if (AUTO) this.wait(0.4).then(() => { if (this._dropJobs.has(rec)) rec.done('tap'); }).catch(() => {});
-      return () => this._dropJobs.delete(rec);
+      return () => { this._dropJobs.delete(rec); zone.dispose(); };
     });
+  }
+
+  /**
+   * Visual guide for a drag-and-drop step: a pulsing ring on the bench where the item goes, a short label,
+   * and a trail of moving dots from the item to the ring. The ring turns solid when the item is close enough.
+   */
+  _dropZone(item, target, radius) {
+    const g = new THREE.Group();
+    const tp = target.getWorldPosition(new THREE.Vector3());
+    const r = THREE.MathUtils.clamp(radius * 0.45, 0.025, 0.06);
+    g.position.set(tp.x, tp.y + 0.003, tp.z);
+    const mk = (inner, outer, opacity) => {
+      const m = new THREE.Mesh(new THREE.RingGeometry(inner, outer, 48), new THREE.MeshBasicMaterial({ color: 0x22c55e, transparent: true, opacity, depthTest: false, depthWrite: false, side: THREE.DoubleSide, toneMapped: false }));
+      m.rotation.x = -Math.PI / 2; m.renderOrder = 20; m.raycast = () => {}; g.add(m); return m;
+    };
+    const ring = mk(r * 0.82, r, 0.95);
+    const fill = mk(0.0001, r * 0.82, 0.16);
+    const pulse = mk(r * 0.9, r, 0.6);
+    const N = 14, pos = new Float32Array(N * 3);
+    const dotsGeo = new THREE.BufferGeometry(); dotsGeo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    const dots = new THREE.Points(dotsGeo, new THREE.PointsMaterial({ color: 0x16a34a, size: 7, sizeAttenuation: false, transparent: true, opacity: 0.9, depthTest: false, depthWrite: false }));
+    dots.renderOrder = 21; dots.frustumCulled = false; dots.raycast = () => {};
+    this.scene.add(g); this.scene.add(dots);
+    let what = (item.userData.pickLabel || item.name || 'it').replace(/ \u2014.*$/, '').replace(/ —.*$/, '').replace(/^the /i, '');
+    if (what.length > 28) what = 'it';
+    const idle = `Drop <b>${what}</b> here`;
+    const tag = this.tag(g, idle, { offset: [0, 0.035, 0], cls: 'drop' });
+    const a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3();
+    let near = false, lastNear = null;
+    const upd = this.onUpdate((dt, t) => {
+      const k = (t * 1.4) % 1;
+      pulse.scale.setScalar(1 + k * 0.9); pulse.material.opacity = 0.6 * (1 - k);
+      item.getWorldPosition(a); b.copy(g.position);
+      const d = Math.hypot(a.x - b.x, a.z - b.z);
+      near = !!(this.drag && this.drag.obj === item) && d < radius * 1.4;
+      fill.material.opacity = near ? 0.45 : 0.16 + Math.sin(t * 4) * 0.05;
+      if (near !== lastNear) {
+        lastNear = near;
+        ring.material.color.set(near ? 0x15803d : 0x22c55e);
+        tag.setText(near ? 'Release to place ✓' : idle);
+        tag.el.classList.toggle('ok', near);
+      }
+      const show = d > r * 1.2;
+      dots.visible = show;
+      if (show) {
+        const lift = Math.min(0.12, 0.04 + d * 0.35);
+        c.set((a.x + b.x) / 2, Math.max(a.y, b.y) + lift, (a.z + b.z) / 2);
+        for (let i = 0; i < N; i++) {
+          const u = (i + (t * 1.2) % 1) / N, v = 1 - u;
+          pos[i * 3] = v * v * a.x + 2 * v * u * c.x + u * u * b.x;
+          pos[i * 3 + 1] = v * v * a.y + 2 * v * u * c.y + u * u * b.y;
+          pos[i * 3 + 2] = v * v * a.z + 2 * v * u * c.z + u * u * b.z;
+        }
+        dotsGeo.attributes.position.needsUpdate = true;
+      }
+    });
+    let gone = false;
+    return {
+      get near() { return near; },
+      dispose: () => {
+        if (gone) return; gone = true;
+        upd(); this.untag(tag); this.scene.remove(g); this.scene.remove(dots);
+        g.traverse((o) => { o.geometry?.dispose(); o.material?.dispose(); }); dotsGeo.dispose(); dots.material.dispose();
+      },
+    };
   }
 
   /** A tap on something that must be dragged: lean it towards its target and say so. */
@@ -397,7 +463,7 @@ export class Lab {
     const nice = (t) => { t = t.replace(/^the /i, ''); return /^[A-Z][a-z]/.test(t) ? t[0].toLowerCase() + t.slice(1) : t; };
     const what = nice(item.userData.pickLabel || item.name || 'it');
     const where = nice(target.userData.pickLabel || target.name || 'glowing apparatus');
-    this.ui?.toast?.(`Drag the ${what} onto the ${where} — tapping won’t do it for you`, 'info', 2800);
+    this.ui?.toast?.(`Hold and drag the ${what} along the green dots`, 'info', 2600);
     this.sfx?.('tick');
   }
 
@@ -490,7 +556,7 @@ export class Lab {
             const local = p.clone().applyMatrix4(parentInv);
             d.obj.position.x = local.x; d.obj.position.z = local.z; d.obj.position.y = d.start.y + 0.06;
             const tgt = d.drop.target.getWorldPosition(_v2);
-            const near = Math.hypot(p.x - tgt.x, p.z - tgt.z) < d.drop.radius;
+            const near = Math.hypot(p.x - tgt.x, p.z - tgt.z) < d.drop.radius * 1.4;
             this.outline.selectedObjects = near ? [d.obj, d.drop.target] : [d.obj]; this.outline.enabled = true;
           }
         } else if (d.axis) {
@@ -530,8 +596,8 @@ export class Lab {
           if (!d.moved) { this._nudge(d.obj, d.drop.target); return; }
           const p = d.obj.getWorldPosition(_v);
           const tgt = d.drop.target.getWorldPosition(_v2);
-          if (Math.hypot(p.x - tgt.x, p.z - tgt.z) < d.drop.radius) { this.sfx?.('drop'); d.drop.done('drag'); }
-          else { this.tween(d.obj.position, { x: d.start.x, y: d.start.y, z: d.start.z, duration: 0.4, ease: 'power2.out' }).catch(() => {}); this.ui?.toast?.('Not there — drop it on the highlighted apparatus', 'warn'); }
+          if (Math.hypot(p.x - tgt.x, p.z - tgt.z) < d.drop.radius * 1.4) { this.sfx?.('drop'); d.drop.done('drag'); }
+          else { this.tween(d.obj.position, { x: d.start.x, y: d.start.y, z: d.start.z, duration: 0.4, ease: 'power2.out' }).catch(() => {}); this.sfx?.('tick'); this.ui?.toast?.('Almost! Follow the green dots and let go inside the green circle', 'info', 2600); }
           this._refreshOutline();
           return;
         }

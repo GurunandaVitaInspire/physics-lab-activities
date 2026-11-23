@@ -93,6 +93,8 @@ button { font-family: inherit; cursor: pointer; color: inherit; }
 .lab-tag.dark { background: rgba(22,22,22,.88); color: #fff; border-color: rgba(255,255,255,.1); }
 .lab-tag.mono { font-family: var(--mono); }
 .lab-tag.warn { background: #fef3c7; color: #92400e; }
+.lab-tag.drop { background: #22c55e; color: #fff; border: 0; font-size: 13px; padding: 5px 11px; border-radius: 999px; box-shadow: 0 6px 16px -6px rgba(22,163,74,.7); }
+.lab-tag.drop.ok { background: #15803d; }
 .lab-tooltip { position: absolute; left: 0; top: 0; pointer-events: none; font: 600 12px var(--font); background: var(--ink); color: #fff; padding: 5px 10px; border-radius: 8px; opacity: 0; transition: opacity .15s; z-index: 20; white-space: nowrap; }
 .lab-tooltip.show { opacity: 1; }
 
@@ -151,8 +153,8 @@ button { font-family: inherit; cursor: pointer; color: inherit; }
 .hb-sub { font-size: 10px; color: var(--ink2); margin-top: 4px; }
 .hb-ring { display: none; }
 
-.toasts { position: absolute; top: 92px; left: 50%; transform: translateX(-50%); z-index: 12; display: flex; flex-direction: column; gap: 8px; align-items: center; pointer-events: none; }
-.toast { background: var(--ink); color: #fff; padding: 9px 16px; border-radius: 999px; font-size: 14px; font-weight: 600; box-shadow: 0 10px 30px -12px rgba(0,0,0,.5); }
+.toasts { position: absolute; bottom: 160px; left: 50%; transform: translateX(-50%); z-index: 12; width: max-content; max-width: min(520px, calc(100% - 200px)); text-align: center; display: flex; flex-direction: column; gap: 8px; align-items: center; pointer-events: none; }
+.toast { background: rgba(22,22,22,.9); color: #fff; padding: 9px 16px; border-radius: 16px; backdrop-filter: blur(6px); font-size: 14px; font-weight: 600; box-shadow: 0 10px 30px -12px rgba(0,0,0,.5); }
 .toast.warn { background: #b45309; }
 .toast.good { background: #15803d; }
 .obs-flash { position: absolute; left: 50%; bottom: 86px; transform: translateX(-50%); z-index: 11; background: #fffbeb; color: #78350f; border: 1px solid #fcd34d; padding: 10px 16px; border-radius: 16px; font-weight: 600; font-size: 14px; box-shadow: 0 10px 30px -12px rgba(0,0,0,.35); max-width: min(620px, 90%); pointer-events: none; }
