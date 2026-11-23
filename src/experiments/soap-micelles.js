@@ -189,7 +189,7 @@ export default async function run({ lab, ui }) {
   /* ------------------------------------------- 1. water */
   ui.step(0, 'Drag the <b>water</b> bottle to test tube <b>A</b>. Pour about 10 mL into each tube.', { sub: 'Fill both tubes to the same level.' });
   await lab.waitDrop(water, A, { radius: 0.1 });
-  const wHome = water.position.clone();
+  const wHome = (water.userData.restPos || water.position).clone();
   await pour(lab, water, A, { amount: tubeLevel(10), duration: 1.6, side: -1, back: false });
   await pour(lab, water, B, { amount: tubeLevel(10), duration: 1.6, side: 1, back: false });
   await lab.carry(water, [wHome.x, wHome.y, wHome.z], { lift: 0.04, duration: 1 });
@@ -199,7 +199,7 @@ export default async function run({ lab, ui }) {
   /* ------------------------------------------- 2. oil */
   ui.step(1, 'Drag the <b>cooking oil</b> to the test tubes to add a few drops to each.', { sub: 'Only a few drops are needed.' });
   await lab.waitDrop(oil, B, { radius: 0.1 });
-  const oHome = oil.position.clone();
+  const oHome = (oil.userData.restPos || oil.position).clone();
   await lab.focus({ pos: [0, 0.14, 0.3], target: [0, 0.08, -0.01] }, 1);
   await pour(lab, oil, B, { amount: 0, duration: 0.8, side: 1, back: false, onFlowing: () => B.em.layerTo(0.0032, 0.9) });
   await pour(lab, oil, A, { amount: 0, duration: 0.8, side: -1, back: false, onFlowing: () => A.em.layerTo(0.0032, 0.9) });

@@ -135,7 +135,7 @@ export default async function run({ lab, ui }) {
   /* ------------------------------------------- 2. lime water into B and D */
   ui.step(1, 'Drag the <b>lime water</b> bottle to test tube <b>B</b>. It will fill B and D.', { sub: 'Lime water must be freshly prepared and clear.' });
   await lab.waitDrop(lime, B, { radius: 0.1 });
-  const limeHome = lime.position.clone();
+  const limeHome = (lime.userData.restPos || lime.position).clone();
   await pour(lab, lime, B, { amount: tubeLevel(5), duration: 1.6, side: 1, back: false });
   await pour(lab, lime, D, { amount: tubeLevel(5), duration: 1.6, side: 1, back: false });
   await lab.carry(lime, [limeHome.x, limeHome.y, limeHome.z], { lift: 0.03, duration: 0.9 });

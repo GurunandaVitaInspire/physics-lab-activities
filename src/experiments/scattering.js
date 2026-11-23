@@ -131,7 +131,7 @@ export default async function run({ lab, ui }) {
   /* ----------------------------------------------- 2. hypo */
   ui.step(1, 'Drag the <b>sodium thiosulphate</b> (hypo) bottle onto the tank to add about 200 g of crystals.');
   await lab.waitDrop(hypo, tank, { radius: 0.15 });
-  const hHome = hypo.position.clone();
+  const hHome = (hypo.userData.restPos || hypo.position).clone();
   await lab.carry(hypo, [TANK_X - 0.02, 0.15, 0.03], { lift: 0.06, duration: 1.0 });
   await lab.tween(hypo.rotation, { z: -1.9, duration: 0.6 });
   const crystals = [];

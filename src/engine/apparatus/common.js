@@ -418,7 +418,7 @@ export function paperStrip({ color = 0x7aa2ff, len = 0.06 } = {}) {
  * Animates: lift, move above target, tilt, stream, rising level, return.
  */
 export async function pour(lab, bottle, target, { amount = 0.03, duration = 2, side = 1, color, back = true, onFlowing } = {}) {
-  const home = bottle.position.clone(); const homeRot = bottle.rotation.clone();
+  const home = (bottle.userData.restPos || bottle.position).clone(); const homeRot = (bottle.userData.restRot || bottle.rotation).clone();
   const mouth = target.mouthWorld();
   // Place the bottle so that, once tilted, its lip sits just above the target's mouth.
   const tilt = side * 1.72;

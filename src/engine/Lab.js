@@ -375,6 +375,9 @@ export class Lab {
    */
   waitDrop(item, target, { radius = 0.12, hint = true } = {}) {
     this.pickable(item);
+    // Where the item rests before the student picks it up: helpers send it back here when the task is done.
+    item.userData.restPos = item.position.clone();
+    item.userData.restRot = item.rotation.clone();
     if (hint) this.setHint([item]);
     return this._promise((res) => {
       const zone = this._dropZone(item, target, radius);

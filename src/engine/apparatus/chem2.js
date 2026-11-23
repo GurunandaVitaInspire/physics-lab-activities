@@ -296,7 +296,7 @@ export function fumeCupboard({ w = 0.78, h = 0.66, d = 0.5, color = 0x6b7279 } =
  * src.lipLocal (local Vector3) marks the pouring edge.
  */
 export async function pourInto(lab, src, target, { amount = 0.02, duration = 2, side = 1, drainTo = 0, tilt = 1.72, onFlowing } = {}) {
-  const home = src.position.clone(); const homeRot = src.rotation.clone();
+  const home = (src.userData.restPos || src.position).clone(); const homeRot = (src.userData.restRot || src.rotation).clone();
   const mouth = target.mouthWorld();
   const tl = side * tilt;
   const lipL = (src.lipLocal || new THREE.Vector3(0, 0.1, 0)).clone();
