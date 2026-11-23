@@ -364,9 +364,34 @@ export class Lab {
     return this._promise((res) => {
       const h = (obj) => { if (list.includes(obj)) { this.setHint([]); this.sfx?.('click'); res(obj); return true; } return false; };
       this._clickHandlers.add(h);
+      list.forEach((t) => this._clickTargets.add(t));
       if (AUTO) this.wait(0.4).then(() => h(list[0])).catch(() => {});
-      return () => this._clickHandlers.delete(h);
+      return () => { this._clickHandlers.delete(h); list.forEach((t) => this._clickTargets.delete(t)); };
     });
+  }
+
+  /**
+   * Forgiving taps: small or moving targets (a thin molecule, a wire end) are hard to hit exactly, and a
+   * bigger object in front can swallow the tap. Returns the waiting target whose on-screen size, plus a
+   * finger-sized margin, contains the tap point.
+   */
+  _nearTarget(clientX, clientY) {
+    const el = this.renderer.domElement, r = el.getBoundingClientRect();
+    let best = null, bestD = Infinity;
+    for (const t of this._clickTargets) {
+      if (!t.visible) continue;
+      const b = new THREE.Box3().setFromObject(t);
+      if (b.isEmpty()) continue;
+      const sph = b.getBoundingSphere(new THREE.Sphere());
+      const c = sph.center.clone().project(this.camera);
+      if (c.z > 1) continue;
+      const edge = sph.center.clone().addScaledVector(_v.set(1, 0, 0).applyQuaternion(this.camera.quaternion), sph.radius).project(this.camera);
+      const sx = (c.x + 1) / 2 * r.width + r.left, sy = (1 - c.y) / 2 * r.height + r.top;
+      const rad = Math.abs(edge.x - c.x) / 2 * r.width;
+      const d = Math.hypot(clientX - sx, clientY - sy);
+      if (d < Math.max(rad, 12) + 30 && d < bestD) { best = t; bestD = d; }
+    }
+    return best;
   }
 
   /**
@@ -527,6 +552,7 @@ export class Lab {
   /* ------------------------------------------------- pointer events */
   _bind() {
     this._clickHandlers = new Set();
+    this._clickTargets = new Set();
     this._timers = new Set();
     this._conds = new Set();
     this._dropJobs = new Set();
@@ -614,8 +640,19 @@ export class Lab {
         }
         if (d.axis) { d.axis.onEnd?.(d.obj.position[d.axis.axis]); if (d.moved) return; }
       }
-      if (wasClick && downAt.hit) {
-        for (const h of [...this._clickHandlers]) if (h(downAt.hit)) break;
+      if (wasClick) {
+        let handled = false;
+        if (downAt.hit) for (const h of [...this._clickHandlers]) if (h(downAt.hit)) { handled = true; break; }
+        if (!handled && this._clickTargets.size) {
+          const near = this._nearTarget(e.clientX, e.clientY);
+          if (near) for (const h of [...this._clickHandlers]) if (h(near)) { handled = true; break; }
+          if (!handled) {
+            const t = [...this._clickTargets].find((o) => o.visible);
+            const name = t ? (t.userData.pickLabel || t.name || 'highlighted object') : 'highlighted object';
+            const wrong = downAt.hit && downAt.hit !== t ? `That's the ${(downAt.hit.userData.pickLabel || downAt.hit.name || 'wrong object').toLowerCase()}. ` : '';
+            this.ui?.toast?.(`${wrong}Tap the glowing ${name.toLowerCase()} first`, 'info', 2600);
+          }
+        }
       }
       downAt = null;
     };

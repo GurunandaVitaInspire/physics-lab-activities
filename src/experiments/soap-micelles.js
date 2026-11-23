@@ -306,8 +306,13 @@ export default async function run({ lab, ui }) {
   tags.push(lab.tag(micro.oil, 'Oil droplet (grease)', { offset: [0, 0.066, 0], cls: 'dark' }));
   ui.observe('Magnified millions of times, the soapy water shows an <b>oil droplet</b> and many separate <b>soap molecules</b> moving about.', { icon: '🔬' });
 
-  ui.instruct('Tap the highlighted <b>soap molecule</b> to look at it closely.', { sub: 'Each molecule has two very different ends.' });
+  // keep the featured molecule still and in plain view while the student looks for it
+  micro.featMol.vel.set(0, 0, 0); micro.featMol.spin.set(0, 0, 1);
+  micro.featMol.pos.set(-0.075, 0.05, 0.08); micro.featMol.dir.set(-1, -0.35, 0.1).normalize();
+  const tFeat = lab.tag(micro.fHead, 'Soap molecule — tap me', { offset: [0, 0.022, 0], cls: 'dark' });
+  ui.instruct('Tap the glowing <b>soap molecule</b> (left of the oil droplet) to look at it closely.', { sub: 'Not the big yellow ball — that is the oil. The soap molecule has a red head and a white tail.' });
   await lab.waitClick(micro.feat);
+  lab.untag(tFeat);
   const fp = micro.featMol.pos.clone().add(M);
   ctl.minDistance = 0.05;
   await lab.focus({ pos: [fp.x + 0.03, fp.y + 0.03, fp.z + 0.16], target: [fp.x + 0.012, fp.y, fp.z] }, 1.3);
