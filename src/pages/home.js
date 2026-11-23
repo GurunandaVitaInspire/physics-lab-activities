@@ -106,19 +106,6 @@ export async function renderHome(app) {
       <div><b data-count="100" data-suffix="%">0</b><span>in the browser — nothing to install</span></div>
     </section>
 
-    <div class="marquee" aria-hidden="true"><div class="mq-track">${titles}${titles}</div></div>
-    <div class="marquee rev" aria-hidden="true"><div class="mq-track">${titles}${titles}</div></div>
-
-    <section class="reel" id="reel">
-      <div class="reel-sticky">
-        <div class="reel-head">
-          <div><div class="h-kicker">The full lab</div><h2>${total} experiments.<br>One scroll.</h2></div>
-          <div class="reel-count"><b class="rc-now">01</b><span>/ ${pad(total)}</span><div class="rc-bar"><i></i></div><small class="rc-lesson"></small></div>
-        </div>
-        <div class="reel-track">${cards}<a class="xcard xend" href="#lessons"><div class="xe-in"><b>${total}</b><span>experiments<br>ready to run</span><em>Browse by lesson ↓</em></div></a></div>
-      </div>
-    </section>
-
     <section class="h-lessons" id="lessons">
       <div class="sec-top"><div class="h-kicker">Eight lessons</div><h2>Choose where to begin</h2><p>${done ? `You have finished <b>${done}</b> of ${total} experiments and earned <b>${stars}</b> ★.` : 'Every lesson has its digital lab and a Lab Rush game.'}</p></div>
       <div class="lgrid">
@@ -134,6 +121,20 @@ export async function renderHome(app) {
         }).join('')}
       </div>
     </section>
+
+    <div class="marquee" aria-hidden="true"><div class="mq-track">${titles}${titles}</div></div>
+    <div class="marquee rev" aria-hidden="true"><div class="mq-track">${titles}${titles}</div></div>
+
+    <section class="reel" id="reel">
+      <div class="reel-sticky">
+        <div class="reel-head">
+          <div><div class="h-kicker">The full lab</div><h2>${total} experiments.<br>One scroll.</h2></div>
+          <div class="reel-count"><b class="rc-now">01</b><span>/ ${pad(total)}</span><div class="rc-bar"><i></i></div><small class="rc-lesson"></small></div>
+        </div>
+        <div class="reel-track">${cards}<a class="xcard xend" href="#lessons"><div class="xe-in"><b>${total}</b><span>experiments<br>ready to run</span><em>Browse by lesson ↑</em></div></a></div>
+      </div>
+    </section>
+
 
     <section class="h-how" id="how">
       <div class="sec-top"><div class="h-kicker">How a lab works</div><h2>Not a video. You do it.</h2></div>
