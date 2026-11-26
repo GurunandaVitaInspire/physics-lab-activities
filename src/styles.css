@@ -290,7 +290,23 @@ button.wrong { box-shadow: 0 0 0 2px #e0353b !important; background: #fff1f0 !im
 .pl-opts button { text-align: left; border: 0; background: #fff; padding: 15px; border-radius: 16px; font-size: 16px; font-weight: 500; color: var(--ink); display: flex; gap: 12px; align-items: center; box-shadow: 0 0 0 1.5px #e2e2dd; transition: box-shadow .15s, transform .15s; }
 .pl-opts button:hover:not(:disabled) { box-shadow: 0 0 0 1.5px var(--ink); transform: translateY(-1px); }
 .pl-opts .k { flex: 0 0 28px; height: 28px; border-radius: 9px; background: #efefeb; display: grid; place-items: center; font: 700 13px var(--mono); }
-.pl-ex { margin-top: 14px; background: #f3f3f0; border-radius: 16px; padding: 12px 14px; display: flex; gap: 12px; align-items: center; justify-content: space-between; line-height: 1.45; }
+.pl-ex { margin-top: 16px; background: #f6f6f3; border-radius: 18px; padding: 14px 16px; line-height: 1.5; box-shadow: inset 0 0 0 1.5px #e4e4df; }
+.pl-ex.ok { background: #effaf2; box-shadow: inset 0 0 0 1.5px #bfe5ca; } .pl-ex.no { background: #fff5f2; box-shadow: inset 0 0 0 1.5px #f3cfc4; }
+.pl-ex-head { display: flex; align-items: center; gap: 10px; font-size: 17px; }
+.pl-ex-badge { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; color: #fff; background: #e0353b; flex: none; }
+.pl-ex.ok .pl-ex-badge { background: #16a34a; }
+.pl-say { margin-left: auto; display: inline-flex; align-items: center; gap: 8px; border: 0; background: #fff; color: var(--ink); border-radius: 999px; padding: 7px 14px 7px 11px; font-size: 14px; font-weight: 600; box-shadow: 0 0 0 1.5px #dcdcd6; cursor: pointer; }
+.pl-say:hover { box-shadow: 0 0 0 1.5px var(--ink); }
+.pl-say .pl-say-eq { display: inline-flex; align-items: flex-end; gap: 2px; height: 14px; }
+.pl-say .pl-say-eq i { width: 3px; height: 5px; border-radius: 2px; background: currentColor; }
+.pl-say.on .pl-say-eq i { animation: pl-eq .8s ease-in-out infinite; } .pl-say.on .pl-say-eq i:nth-child(2) { animation-delay: .15s; } .pl-say.on .pl-say-eq i:nth-child(3) { animation-delay: .3s; }
+@keyframes pl-eq { 0%, 100% { height: 4px; } 50% { height: 14px; } }
+.pl-ex-ans { margin: 10px 0 0 38px; font-size: 15px; }
+.pl-ex-why { margin: 10px 0 0 38px; }
+.pl-ex-why small { display: block; font: 700 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink2); margin-bottom: 2px; }
+.pl-ex-why p { margin: 0; font-size: 15.5px; }
+.pl-ex-foot { display: flex; align-items: center; justify-content: flex-end; gap: 12px; margin-top: 12px; }
+.pl-ex-hint { font-size: 12px; color: var(--ink2); }
 .pl-ex[hidden] { display: none; }
 .pl-pop { position: absolute; right: 92px; top: 28px; font: 700 26px var(--display); color: #16a34a; pointer-events: none; }
 .pl-end { display: grid; place-items: center; padding-top: 20px; }
@@ -304,5 +320,5 @@ button.wrong { box-shadow: 0 0 0 2px #e0353b !important; background: #fff1f0 !im
   .pl-intro { grid-template-columns: 1fr; }
   .pl-opts { grid-template-columns: 1fr; }
   .pl-hud { grid-template-columns: auto 1fr auto; } .pl-streak { display: none; }
-  .pl-ex { flex-direction: column; align-items: stretch; }
+  .pl-ex-ans, .pl-ex-why { margin-left: 0; } .pl-ex-hint { display: none; } .pl-ex-foot .pl-next { flex: 1; }
 }

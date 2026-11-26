@@ -63,14 +63,50 @@ function pickVoice() {
 }
 if ('speechSynthesis' in window) speechSynthesis.onvoiceschanged = () => { voice = null; pickVoice(); };
 
-export function speak(text) {
-  if (!state.voice || !state.sound || !('speechSynthesis' in window) || !text) return;
+const SUB = { '₀': '0', '₁': '1', '₂': '2', '₃': '3', '₄': '4', '₅': '5', '₆': '6', '₇': '7', '₈': '8', '₉': '9' };
+/**
+ * Turn science text into something a speech engine reads the way a teacher would:
+ * CuSO₄·5H₂O → "C U S O 4, 5 H 2 O", 2H₂ + O₂ → 2H₂O → "2 H 2 plus O 2 gives 2 H 2 O", R ∝ l → "R is proportional to l".
+ */
+export function speakable(html) {
+  let t = String(html).replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/&amp;/g, ' and ');
+  t = t.replace(/[₀-₉]/g, (c) => SUB[c])
+    .replace(/([²³]?)([⁺⁻])/g, (m, n, s) => ` ${n === '²' ? 'two ' : n === '³' ? 'three ' : ''}${s === '⁺' ? 'plus' : 'minus'}`) // Pb²⁺ → "Pb two plus"
+    .replace(/²/g, ' squared ').replace(/³/g, ' cubed ').replace(/÷/g, ' divided by ');
+  // chemical formulas: two or more element symbols, or a symbol with a count (H2O, NaHCO3, KMnO4, NO2)
+  // chemical formulas, with an optional coefficient: 2HCl, 5H2O, NaHCO3, KMnO4, NO2 (not ordinary words)
+  t = t.replace(/(^|[^A-Za-z0-9])(\d*)((?:[A-Z][a-z]?\d*)+)(?![A-Za-z0-9])/g, (m, pre, coef, body) => {
+    const parts = body.match(/[A-Z][a-z]?\d*/g);
+    if (parts.length < 2 && !/\d/.test(body)) return m;
+    const said = body.match(/[A-Z][a-z]?|\d+/g).map((p) => (/\d/.test(p) ? p : p.toUpperCase().split('').join(' '))).join(' ');
+    return `${pre}${coef ? coef + ' ' : ''}${said}`;
+  });
+  t = t.replace(/\)(\d+)/g, '), $1');
+  return t
+    .replace(/·/g, ', ').replace(/½/g, ' half ').replace(/→/g, ' gives ').replace(/⇌/g, ' gives ').replace(/∝/g, ' is proportional to ')
+    .replace(/Ω\s?m\b/g, ' ohm metre').replace(/(^|[^\d.])1\s?Ω/g, '$1 1 ohm').replace(/Ω/g, ' ohms').replace(/ρ/g, ' rho ').replace(/°C/g, ' degrees Celsius').replace(/°/g, ' degrees')
+    .replace(/\s[−-]\s/g, ' minus ').replace(/\s\+\s/g, ' plus ').replace(/\s=\s/g, ' equals ').replace(/\s×\s/g, ' times ')
+    .replace(/(\w)\s?\/\s?(\w)/g, '$1 over $2').replace(/~/g, 'about ').replace(/≈/g, ' approximately ').replace(/≠/g, ' is not equal to ').replace(/[≥]/g, ' at least ').replace(/[≤]/g, ' at most ').replace(/[—–]/g, ', ')
+    .replace(/\(aq\)/g, ' aqueous').replace(/\(s\)/g, ' solid').replace(/\(g\)/g, ' gas').replace(/\(l\)/g, ' liquid')
+    .replace(/−/g, ' minus ').replace(/=/g, ' equals ')
+    .replace(/\s+/g, ' ').trim();
+}
+
+/**
+ * Read text aloud with the device's built-in voice (works offline, nothing to download).
+ * Returns false when speech is unavailable or muted. onEnd also fires when speech is cancelled.
+ */
+export function speak(text, { onStart, onEnd, force = false } = {}) {
+  if ((!force && (!state.voice || !state.sound)) || !('speechSynthesis' in window) || !text) return false;
   try {
     speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text.replace(/<[^>]+>/g, '').replace(/→/g, 'gives'));
-    const v = pickVoice(); if (v) u.voice = v;
-    u.rate = 0.98; u.pitch = 1.02; u.volume = 0.9;
+    const u = new SpeechSynthesisUtterance(speakable(text));
+    const v = pickVoice(); if (v) { u.voice = v; u.lang = v.lang; } else u.lang = 'en-IN';
+    u.rate = 0.95; u.pitch = 1.02; u.volume = 0.95;
+    if (onStart) u.onstart = onStart;
+    if (onEnd) { u.onend = onEnd; u.onerror = onEnd; }
     speechSynthesis.speak(u);
-  } catch { /* ignore */ }
+    return true;
+  } catch { return false; }
 }
 export function stopSpeech() { try { speechSynthesis.cancel(); } catch { /* ignore */ } }

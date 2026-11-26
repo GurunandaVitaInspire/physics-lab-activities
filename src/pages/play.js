@@ -2,7 +2,7 @@
 import gsap from 'gsap';
 import { findLesson, school } from '../data/lessons.js';
 import { challenges } from '../data/challenges.js';
-import { sfx, unlockAudio, soundOn, setSound } from '../engine/audio.js';
+import { sfx, unlockAudio, soundOn, setSound, speak, stopSpeech } from '../engine/audio.js';
 import { icon } from './icons.js';
 
 const ROUND = 10, TIME = 15, LIVES = 3;
@@ -127,9 +127,28 @@ export async function renderPlay(app, slug) {
           gsap.fromTo($('.pl-card'), { x: -10 }, { x: 0, duration: 0.5, ease: 'elastic.out(1.2,0.3)' });
         }
         hud();
+        // "Why?" panel: the verdict, the right answer and the theory behind it — shown and read aloud.
+        const ans = q.options[q.answer];
+        const verdict = ok ? 'Correct!' : k < 0 ? 'Time’s up!' : 'Not quite.';
         const ex = $('.pl-ex'); ex.hidden = false;
-        ex.innerHTML = `<b>${ok ? 'Correct!' : k < 0 ? 'Time’s up!' : 'Not quite.'}</b> ${q.explain}<button class="btn primary sm pl-next">${i + 1 < ROUND && lives > 0 ? 'Next ▸' : 'See result ▸'}</button>`;
+        ex.className = `pl-ex ${ok ? 'ok' : 'no'}`;
+        ex.innerHTML = `
+          <div class="pl-ex-head"><span class="pl-ex-badge">${ok ? '✓' : k < 0 ? '⏱' : '✗'}</span><b>${verdict}</b>
+            <button class="pl-say" type="button" title="Listen to the explanation" aria-label="Listen to the explanation"><span class="pl-say-eq"><i></i><i></i><i></i></span><span class="pl-say-t">Listen</span></button></div>
+          ${ok ? '' : `<div class="pl-ex-ans">Correct answer: <b>${ans}</b></div>`}
+          <div class="pl-ex-why"><small>Why?</small><p>${q.explain}</p></div>
+          <div class="pl-ex-foot"><span class="pl-ex-hint">Enter ↵ for next</span><button class="btn primary sm pl-next">${i + 1 < ROUND && lives > 0 ? 'Next ▸' : 'See result ▸'}</button></div>`;
+        const say = ex.querySelector('.pl-say');
+        const talk = (force) => speak(`${verdict} ${ok ? `${ans} is right.` : `The correct answer is ${ans}.`} ${q.explain}`, {
+          force,
+          onStart: () => { say.classList.add('on'); say.querySelector('.pl-say-t').textContent = 'Stop'; },
+          onEnd: () => { say.classList.remove('on'); say.querySelector('.pl-say-t').textContent = 'Listen'; },
+        });
+        say.onclick = () => { unlockAudio(); if (say.classList.contains('on')) stopSpeech(); else talk(true); };
+        if (!talk(false)) say.classList.add('muted');
         ex.querySelector('.pl-next').onclick = next;
+        gsap.from(ex, { y: 14, opacity: 0, duration: 0.35, ease: 'power2.out' });
+        setTimeout(() => { if (alive && !ex.hidden) ex.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 120);
       };
       $('.pl-opts').onclick = (e) => { const b = e.target.closest('button'); if (b) answer(+b.dataset.k); };
       keyHandler = (e) => {
@@ -137,7 +156,7 @@ export async function renderPlay(app, slug) {
         else if ((e.key === 'Enter' || e.key === ' ') && locked) { e.preventDefault(); next(); }
       };
     };
-    const next = () => { i++; if (i < ROUND && lives > 0) ask(); else end(); };
+    const next = () => { stopSpeech(); i++; if (i < ROUND && lives > 0) ask(); else end(); };
     const end = () => {
       stop(); keyHandler = null;
       const acc = right / Math.max(1, Math.min(i, ROUND));
@@ -162,5 +181,5 @@ export async function renderPlay(app, slug) {
   const onKey = (e) => keyHandler?.(e);
   window.addEventListener('keydown', onKey);
   intro();
-  return () => { alive = false; stop(); window.removeEventListener('keydown', onKey); };
+  return () => { alive = false; stop(); stopSpeech(); window.removeEventListener('keydown', onKey); };
 }
