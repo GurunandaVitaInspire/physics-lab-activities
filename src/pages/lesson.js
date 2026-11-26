@@ -1,4 +1,4 @@
-import { findLesson, lessons, school } from '../data/lessons.js';
+import { findLesson, lessons, credit } from '../data/lessons.js';
 import { loadProgress } from '../progress.js';
 import { icon } from './icons.js';
 
@@ -11,7 +11,7 @@ export async function renderLesson(app, slug) {
   app.innerHTML = `
   <div class="lesson-page" style="--accent:${l.color}">
     <header class="site-head">
-      <a class="brand" href="#/"><img src="/favicon.svg" alt="" width="34" height="34"><span><b>Smart Science Lab</b><small>${school} · Class X Physical Science</small></span></a>
+      <a class="brand" href="#/"><img src="/favicon.svg" alt="" width="34" height="34"><span><b>Smart Science Lab</b><small>${credit}</small></span></a>
       <a class="btn ghost sm" href="#/">← All lessons</a>
     </header>
     <section class="lesson-hero">

@@ -4,7 +4,7 @@ A realistic, interactive 3D lab for **Class X Physical Science (NCERT)** — 22 
 rebuilt so students actually *do* each experiment: pour acids, light burners, slide candles along an optical bench,
 close circuits and read analog meters.
 
-Built for ZPHS, Gurajanapalli. Runs entirely in the browser; all apparatus, textures and sounds are generated in code,
+Built for V.V. Ramana Murthy, M.Sc, B.Ed., ZPHS, Gurajanapalli. Runs entirely in the browser; all apparatus, textures and sounds are generated in code,
 so there are no image or audio files to download.
 
 ## Lessons and activities

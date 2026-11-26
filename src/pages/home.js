@@ -1,6 +1,6 @@
 // Home page: a light, tactile "lab console" hero, classmates' cursors, and a pinned scroll reel of every experiment.
 import './home.css';
-import { lessons, school, allExperiments } from '../data/lessons.js';
+import { lessons, credit, allExperiments } from '../data/lessons.js';
 import { loadProgress } from '../progress.js';
 import { icon } from './icons.js';
 
@@ -40,7 +40,7 @@ export async function renderHome(app) {
   app.innerHTML = `
   <div class="h-page">
     <header class="h-nav">
-      <a class="h-logo" href="#/"><img src="/favicon.svg" alt="" width="30" height="30">Smart Science Lab</a>
+      <a class="h-logo" href="#/"><img src="/favicon.svg" alt="" width="30" height="30"><span>Smart Science Lab<small>${credit}</small></span></a>
       <nav class="h-pill">
         <a href="#reel">↪ Experiments</a><a href="#lessons">↪ Lessons</a><a href="#how">↪ How it works</a>
       </nav>
@@ -48,7 +48,7 @@ export async function renderHome(app) {
     </header>
 
     <section class="h-hero" id="top">
-      <div class="h-badge">🧪 ${school} · Class X Physical Science</div>
+      <div class="h-badge">🧪 ${credit} · Class X Physical Science</div>
       <h1 class="h-title"><span>Do real science</span><span>right in your browser</span></h1>
 
       <div class="console-wrap">
@@ -146,7 +146,7 @@ export async function renderHome(app) {
       </div>
     </section>
 
-    <footer class="h-foot"><span>Smart Science Lab · ${school}</span><span>Always do real experiments under your teacher’s supervision.</span></footer>
+    <footer class="h-foot"><span>Smart Science Lab · ${credit}</span><span>Always do real experiments under your teacher’s supervision.</span></footer>
   </div>`;
 
   const root = app.querySelector('.h-page');

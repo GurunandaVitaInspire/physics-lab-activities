@@ -1,5 +1,5 @@
 // Experiment page: builds the 3D lab + HUD and runs the experiment script.
-import { findExperiment, nextExperiment } from '../data/lessons.js';
+import { findExperiment, nextExperiment, credit } from '../data/lessons.js';
 import { Lab, LabAborted } from '../engine/Lab.js';
 import { LabUI } from '../engine/ui.js';
 import { stopSpeech } from '../engine/audio.js';
@@ -15,9 +15,10 @@ export async function renderExperiment(app, id) {
 
   app.innerHTML = `
   <div class="labpage" style="--accent:${meta.lesson.color}">
+    <div class="lt-credit-bar">${credit}</div>
     <header class="lab-top">
       <a class="lt-back" href="#/lesson/${meta.lesson.slug}" title="Back to lesson">←</a>
-      <div class="lt-title"><small>Lesson ${meta.lesson.no} · ${meta.activity}</small><b>${meta.title}</b></div>
+      <div class="lt-title"><small class="lt-credit">${credit}</small><small>Lesson ${meta.lesson.no} · ${meta.activity}</small><b>${meta.title}</b></div>
       <span class="step-pill"></span>
       <div class="lab-actions">
         <button data-act="voice" title="Voice narration">🗣️</button>

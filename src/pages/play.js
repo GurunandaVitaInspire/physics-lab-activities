@@ -1,6 +1,6 @@
 // Play & Learn — "Lab Rush": a timed 10-question challenge per lesson with lives, streaks and a time bonus.
 import gsap from 'gsap';
-import { findLesson, school } from '../data/lessons.js';
+import { findLesson, credit } from '../data/lessons.js';
 import { challenges } from '../data/challenges.js';
 import { sfx, unlockAudio, soundOn, setSound, speak, stopSpeech } from '../engine/audio.js';
 import { icon } from './icons.js';
@@ -21,7 +21,7 @@ export async function renderPlay(app, slug) {
   app.innerHTML = `
   <div class="play-page" style="--accent:${l.color}">
     <header class="site-head">
-      <a class="brand" href="#/"><img src="/favicon.svg" alt="" width="34" height="34"><span><b>Smart Science Lab</b><small>${school} · Play & Learn</small></span></a>
+      <a class="brand" href="#/"><img src="/favicon.svg" alt="" width="34" height="34"><span><b>Smart Science Lab</b><small>${credit}</small></span></a>
       <div class="play-head-actions"><button class="btn ghost sm snd">${soundOn() ? '🔊' : '🔇'}</button><a class="btn ghost sm" href="#/lesson/${l.slug}">← Lesson ${l.no}</a></div>
     </header>
     <main class="play-stage"></main>

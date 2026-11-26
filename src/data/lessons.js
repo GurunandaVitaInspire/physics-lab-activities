@@ -1,5 +1,8 @@
 // Curriculum: Class X Physical Science (NCERT). Aims follow the existing Smart Science Lab site.
+export const teacher = 'V.V. Ramana Murthy, M.Sc, B.Ed.';
 export const school = 'ZPHS, Gurajanapalli';
+/** Shown at the top of every page: the teacher first, then the school. */
+export const credit = `${teacher} · ${school}`;
 
 export const lessons = [
   {

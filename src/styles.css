@@ -71,6 +71,9 @@ button { font-family: inherit; cursor: pointer; color: inherit; }
 .lt-title { min-width: 0; flex: 1; }
 .lt-title small { display: flex; align-items: center; gap: 6px; color: var(--ink2); font-size: 12px; font-weight: 600; }
 .lt-title small::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+.lt-title small.lt-credit { color: var(--ink); font-size: 11.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+.lt-title small.lt-credit::before { display: none; }
+.lt-credit-bar { display: none; padding: 5px 12px; font-size: 11px; font-weight: 600; text-align: center; color: var(--ink); background: #ecece7; border-bottom: 1px solid var(--line); }
 .lt-title b { display: block; font-family: var(--display); font-size: 18px; font-weight: 600; letter-spacing: -.03em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .step-pill { font-family: var(--mono); font-size: 12px; padding: 7px 12px; border-radius: 999px; background: #e3e3df; box-shadow: inset 0 1px 2px rgba(0,0,0,.08); color: var(--ink); white-space: nowrap; }
 .step-pill:empty { display: none; }
@@ -257,6 +260,8 @@ button.wrong { box-shadow: 0 0 0 2px #e0353b !important; background: #fff1f0 !im
 @media (max-width: 560px) {
   .banner-text { font-size: 14px; }
   .lt-title b { font-size: 15px; }
+  .lt-title small.lt-credit { display: none; }
+  .lt-credit-bar { display: block; }
   .lab-actions button { width: 34px; height: 34px; }
   .ctl-slider input { width: 120px; }
 }
