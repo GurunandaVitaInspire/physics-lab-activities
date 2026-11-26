@@ -27,7 +27,7 @@ export async function renderHome(app) {
     const s = SUBJECT[e.lesson.subject];
     const st = prog[e.id] || 0;
     return `<a class="xcard" href="#/lab/${e.id}" style="--c:${e.lesson.color}">
-      <div class="xc-art"><img src="/thumbs/${e.id}.jpg" alt="${e.title} — 3D lab" loading="lazy" width="640" height="400"><span class="xc-num">${pad(i + 1)}</span></div>
+      <div class="xc-art"><img src="/thumbs/${e.id}.webp" alt="${e.title} — 3D lab" loading="lazy" width="640" height="400"><span class="xc-num">${pad(i + 1)}</span></div>
       <div class="xc-body">
         <div class="xc-meta"><span class="xc-dot" style="background:${s.color}"></span>Lesson ${e.lesson.no} · ${e.activity}</div>
         <h3>${e.title}</h3>
@@ -112,7 +112,7 @@ export async function renderHome(app) {
         ${lessons.map((l) => {
           const n = l.experiments.length, d = l.experiments.filter((e) => prog[e.id]).length;
           return `<a class="lcard" href="#/lesson/${l.slug}" style="--c:${l.color}">
-            <div class="lc-img"><img src="/boards/lesson${l.no}.jpg" alt="Chalkboard summary of ${l.title}" loading="lazy" width="960" height="540"></div>
+            <div class="lc-img"><img src="/boards/lesson${l.no}.webp" alt="Chalkboard summary of ${l.title}" loading="lazy" width="960" height="540"></div>
             <div class="lc-row"><span class="lc-ico">${icon(l.icon, 20)}</span><span class="lc-sub">${SUBJECT[l.subject].label} · Lesson ${l.no}</span></div>
             <h3>${l.title}</h3>
             <ul>${l.experiments.map((e) => `<li>${e.title}</li>`).join('')}</ul>

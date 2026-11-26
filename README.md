@@ -48,9 +48,20 @@ The site is fully static (all 3D runs in the student's browser), so Vercel serve
 2. Vercel detects **Vite** automatically (`vercel.json` pins it): build `npm run build`, output `dist`. Click **Deploy**.
 3. Every push to `main` redeploys; pull requests get preview URLs.
 
-Performance built in: the home page is ~20 KB (gzipped) with no 3D library at all; three.js (~135 KB gz) loads only
-when a lab opens, each lab adds ~5 KB, hashed assets are cached for a year (`vercel.json`), and a service worker keeps opened
-labs working offline. Rendering adapts its resolution on slow school devices.
+Performance and weak-internet support:
+
+- **Small first load:** the home page is ~20 KB (gzipped) with no 3D library; web fonts never block the first paint.
+- **Warm-up:** while the student reads the home page, the 3D engine (three.js ~135 KB gz) is fetched in idle time, so the
+  first lab opens without a download wait. Skipped on "Save data" and 2G connections.
+- **Works offline:** after the first visit the service worker (`public/sw.js`) holds the whole app (all 22 labs, ~1 MB),
+  so labs open instantly and work with no internet. Pages use the network with a 2.5 s timeout and fall back to the
+  saved copy, so a slow or dropped connection never shows a blank screen. Each deploy gets a new cache version
+  (the list of files is written into `sw.js` at build time by `vite.config.js`).
+- **No 3D freeze:** shaders are compiled in parallel on the GPU driver (`renderer.compileAsync`) behind the loading
+  spinner, instead of blocking the page on the first frame (this cut lab start-up from ~3.3 s to ~1 s on desktop).
+- **Light images:** thumbnails and chalkboards are WebP (~500 KB in total); hashed assets are cached for a year by the
+  Vercel CDN (`vercel.json`), which also serves Brotli-compressed files from the edge nearest to the student.
+- Rendering quality and resolution adapt to slow school devices.
 
 ## Project layout
 

@@ -283,7 +283,12 @@ export class LabUI {
   }
 
   /** Call once the bench is built: plays the cinematic intro and waits for "Start". */
-  ready() { if (this._ready) return this._ready; this.viewport.querySelector('.loading')?.remove(); return (this._ready = this.intro(this.lab)); }
+  ready() {
+    if (this._ready) return this._ready;
+    const loading = this.viewport.querySelector('.loading');
+    if (loading) loading.lastChild.textContent = 'Preparing the 3D lab…';
+    return (this._ready = Promise.resolve(this.lab?.warm?.()).then(() => { loading?.remove(); return this.intro(this.lab); }));
+  }
 
   /* ------------------------------------------------------- intro */
   /** Cinematic intro: kinetic title over a camera dolly, then the aim + safety card. */

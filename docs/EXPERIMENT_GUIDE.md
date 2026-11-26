@@ -125,4 +125,4 @@ const { audit } = await import('/tools/qa-audit.js'); await audit('<id>');
 
 The auto-student drops every item on its target like a real drag. The audit reports objects that moved during the lab
 and finished intersecting another object or floating in the air, and saves a frame at each key observation
-(`.qa/thumb-<id>-<n>.png`). Thumbnails for the home reel and lesson pages live in `public/thumbs/<id>.jpg` (640×400).
+(`.qa/thumb-<id>-<n>.png`). Thumbnails for the home reel and lesson pages live in `public/thumbs/<id>.webp` (640×400).

@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import fs from 'node:fs';
 import path from 'node:path';
+import crypto from 'node:crypto';
 
 // Dev-only QA helper: the page can POST a PNG (data URL) to /__shot?name=x and it is saved to .qa/x.png.
 function qaShots() {
@@ -25,8 +26,30 @@ function qaShots() {
   };
 }
 
+// Build-only: give the service worker the full list of files to download for offline use, and a version
+// derived from their names (hashed), so each deploy replaces the old cache.
+function swPrecache() {
+  let outDir = 'dist';
+  return {
+    name: 'sw-precache',
+    apply: 'build',
+    configResolved(c) { outDir = c.build.outDir; },
+    closeBundle() {
+      const walk = (d) => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => e.isDirectory() ? walk(path.join(d, e.name)) : [path.join(d, e.name)]);
+      const files = walk(outDir).map((f) => '/' + path.relative(outDir, f).split(path.sep).join('/'))
+        .filter((f) => !/^\/(sw\.js|index\.html|vercel\.json)$/.test(f) && !f.endsWith('.map'));
+      // app code first (needed to open a lab), pictures after
+      files.sort((a, b) => (a.startsWith('/assets/') ? 0 : 1) - (b.startsWith('/assets/') ? 0 : 1));
+      const version = crypto.createHash('sha1').update(files.join('|')).digest('hex').slice(0, 10);
+      const swPath = path.join(outDir, 'sw.js');
+      const src = fs.readFileSync(swPath, 'utf8').replace('__VERSION__', version);
+      fs.writeFileSync(swPath, `self.__PRECACHE=${JSON.stringify(files)};\n${src}`);
+    },
+  };
+}
+
 export default defineConfig({
-  plugins: [qaShots()],
+  plugins: [qaShots(), swPrecache()],
   // No hot reload: several QA runs share this server and a reload would cut them off. Refresh to see changes.
   server: { hmr: false },
   build: {

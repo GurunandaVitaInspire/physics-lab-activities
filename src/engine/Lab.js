@@ -125,6 +125,7 @@ export class Lab {
 
     this._ro = new ResizeObserver(() => this.resize());
     this._ro.observe(container);
+    this._held = !TEST && !!this.renderer.compileAsync; // no frames until warm() has compiled the shaders
     this._loop = this._loop.bind(this);
     r.setAnimationLoop(this._loop);
     if (TEST) {
@@ -717,11 +718,34 @@ export class Lab {
   _loop() {
     if (!this.alive) return;
     const dt = Math.min(0.05, this.clock.getDelta());
+    if (this._held) return; // shaders still compiling in the background (see warm())
     if (TEST) { this.composer.render(); this.labels.render(this.scene, this.camera); return; }
     this.tick(dt);
     this._adapt(dt);
     this.composer.render();
     this.labels.render(this.scene, this.camera);
+  }
+
+  /**
+   * Compile every shader the bench needs before the first frame. Done synchronously by the first render it
+   * freezes the page for seconds (worst on Windows/ANGLE and school tablets); compileAsync uses the GPU
+   * driver's parallel compile so the page — and the loading spinner — stays responsive. Objects that are
+   * hidden for now (effects, close-up scenes) are compiled too, so they do not stutter when they appear.
+   */
+  async warm() {
+    if (!this._held) return;
+    const shown = [];
+    this.scene.traverse((o) => {
+      if (o.visible || o.isLight) return;
+      let light = false; o.traverse((c) => { if (c.isLight) light = true; });
+      if (!light) { o.visible = true; shown.push(o); }
+    });
+    try {
+      await Promise.race([this.renderer.compileAsync(this.scene, this.camera), new Promise((r) => setTimeout(r, 12000))]);
+    } catch (e) { /* fall back to compiling on first render */ }
+    shown.forEach((o) => { o.visible = false; });
+    this._held = false;
+    this.clock.getDelta();
   }
 
   /** Advance the simulation by dt seconds (lab clock, effects, timers, conditions). */

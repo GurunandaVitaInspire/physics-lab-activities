@@ -1,5 +1,5 @@
 """Draw one chalkboard per lesson with the claude-drawing skill (chalk style).
-Usage: python tools/chalkboards.py public/boards [lesson numbers...]  (then convert to 960x540 JPG)
+Usage: python tools/chalkboards.py public/boards [lesson numbers...]  (then convert to 960x540 WebP, quality 80)
 Requires the claude-drawing skill in ~/.claude/skills/claude-drawing plus numpy + Pillow."""
 import os, sys, math
 sys.path.insert(0, os.path.join(os.path.expanduser('~'), '.claude', 'skills', 'claude-drawing', 'lib'))

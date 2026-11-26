@@ -33,7 +33,7 @@ export async function renderPlay(app, slug) {
     stop();
     stage.innerHTML = `
       <section class="pl-intro">
-        <img class="pl-board" src="/boards/lesson${l.no}.jpg" alt="">
+        <img class="pl-board" src="/boards/lesson${l.no}.webp" alt="">
         <div class="pl-intro-card">
           <div class="eyebrow">Lesson ${l.no} · Play & Learn</div>
           <h1>Lab Rush</h1>

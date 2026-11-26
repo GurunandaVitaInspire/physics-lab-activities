@@ -28,7 +28,15 @@ async function route() {
 window.addEventListener('hashchange', route);
 route();
 
-// Offline support in production builds (the dev server must not be cached).
-if (import.meta.env.PROD && 'serviceWorker' in navigator) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));
-}
+// Warm the 3D engine while the student is still reading the home page, so the first lab opens without a
+// download wait. Skipped when the user asked to save data or the connection is very slow (2G): there it is
+// fetched on demand, and the service worker keeps it for every later visit.
+const conn = navigator.connection;
+const lean = conn && (conn.saveData || /(^|-)2g$/.test(conn.effectiveType || ''));
+const idle = window.requestIdleCallback || ((f) => setTimeout(f, 1500));
+window.addEventListener('load', () => idle(async () => {
+  if (!lean) await Promise.allSettled([pages.lab(), pages.lesson()]);
+  // Offline support in production builds (the dev server must not be cached). Registered after the warm-up
+  // so its offline download reuses the files the browser just fetched instead of downloading them twice.
+  if (import.meta.env.PROD && 'serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(() => {});
+}, { timeout: 4000 }));
