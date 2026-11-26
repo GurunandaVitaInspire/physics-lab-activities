@@ -21,7 +21,7 @@ export async function renderPlay(app, slug) {
   app.innerHTML = `
   <div class="play-page" style="--accent:${l.color}">
     <header class="site-head">
-      <a class="brand" href="#/"><img src="/favicon.svg" alt="" width="34" height="34"><span><b>Smart Science Lab</b><small>${credit}</small></span></a>
+      <a class="brand" href="#/"><img src="/favicon.svg" alt="" width="34" height="34"><span><b>Smart Physics Lab</b><small>${credit}</small></span></a>
       <div class="play-head-actions"><button class="btn ghost sm snd">${soundOn() ? '🔊' : '🔇'}</button><a class="btn ghost sm" href="#/lesson/${l.slug}">← Lesson ${l.no}</a></div>
     </header>
     <main class="play-stage"></main>

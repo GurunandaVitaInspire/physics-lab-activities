@@ -40,7 +40,7 @@ export async function renderHome(app) {
   app.innerHTML = `
   <div class="h-page">
     <header class="h-nav">
-      <a class="h-logo" href="#/"><img src="/favicon.svg" alt="" width="30" height="30"><span>Smart Science Lab<small>${credit}</small></span></a>
+      <a class="h-logo" href="#/"><img src="/favicon.svg" alt="" width="30" height="30"><span>Smart Physics Lab<small>${credit}</small></span></a>
       <nav class="h-pill">
         <a href="#reel">↪ Experiments</a><a href="#lessons">↪ Lessons</a><a href="#how">↪ How it works</a>
       </nav>
@@ -146,7 +146,7 @@ export async function renderHome(app) {
       </div>
     </section>
 
-    <footer class="h-foot"><span>Smart Science Lab · ${credit}</span><span>Always do real experiments under your teacher’s supervision.</span></footer>
+    <footer class="h-foot"><span>Smart Physics Lab · ${credit}</span><span>Always do real experiments under your teacher’s supervision.</span></footer>
   </div>`;
 
   const root = app.querySelector('.h-page');

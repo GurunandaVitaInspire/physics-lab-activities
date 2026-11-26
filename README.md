@@ -1,4 +1,4 @@
-# Smart Science Lab — 3D Virtual Laboratory (Class X)
+# Smart Physics Lab — 3D Virtual Laboratory (Class X)
 
 A realistic, interactive 3D lab for **Class X Physical Science (NCERT)** — 22 textbook activities across 8 lessons,
 rebuilt so students actually *do* each experiment: pour acids, light burners, slide candles along an optical bench,

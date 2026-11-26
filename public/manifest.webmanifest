@@ -1,6 +1,6 @@
 {
-  "name": "Smart Science Lab – Class X",
-  "short_name": "Science Lab",
+  "name": "Smart Physics Lab – Class X",
+  "short_name": "Physics Lab",
   "description": "Realistic 3D virtual laboratory for Class X Physical Science.",
   "start_url": "/",
   "display": "standalone",
